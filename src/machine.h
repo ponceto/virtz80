@@ -81,9 +81,9 @@ public: // public interface
     auto clock() -> void;
 
 private: // private interface
-    auto rd_char() -> uint8_t;
+    auto rd_char(int character = '\0') -> uint8_t;
 
-    auto wr_char(const char character) -> uint8_t;
+    auto wr_char(int character = '\0') -> uint8_t;
 
 private: // private cpu interface
     virtual auto cpu_mreq_m1(cpu::Instance& cpu, uint16_t addr, uint8_t data) -> uint8_t override final;

@@ -145,36 +145,28 @@ auto VirtualMachine::clock() -> void
     }
 }
 
-auto VirtualMachine::rd_char() -> uint8_t
+auto VirtualMachine::rd_char(int character) -> uint8_t
 {
-    auto check = [&](const int rc) -> uint8_t
-    {
-        if(rc != EOF) {
-            _state.ichar = rc;
-        }
-        else {
-            _state.ichar = '\0';
-        }
-        return _state.ichar;
-    };
-
-    return check(::fgetc(_istream));
+    if((character = ::fgetc(_istream)) != EOF) {
+    //  static_cast<void>(::fflush(_istream));
+        _state.ichar = character;
+    }
+    else {
+        _state.ichar = '\0';
+    }
+    return _state.ichar;
 }
 
-auto VirtualMachine::wr_char(const char character) -> uint8_t
+auto VirtualMachine::wr_char(int character) -> uint8_t
 {
-    auto check = [&](const int rc) -> uint8_t
-    {
-        if(rc != EOF) {
-            _state.ochar = rc;
-        }
-        else {
-            _state.ochar = '\0';
-        }
-        return _state.ochar;
-    };
-
-    return check(::fputc(character, _ostream));
+    if((character = ::fputc(character, _ostream)) != EOF) {
+        static_cast<void>(::fflush(_ostream));
+        _state.ochar = character;
+    }
+    else {
+        _state.ochar = '\0';
+    }
+    return _state.ochar;
 }
 
 auto VirtualMachine::cpu_mreq_m1(cpu::Instance& cpu, uint16_t addr, uint8_t data) -> uint8_t
