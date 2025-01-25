@@ -20,9 +20,9 @@
 # ----------------------------------------------------------------------------
 
 TOPDIR   = $(CURDIR)
-OPTLEVEL = -O2
+OPTLEVEL = -O2 -g
 WARNINGS = -Wall
-EXTRAS   = -g
+EXTRAS   = -pthread
 CC       = gcc
 CFLAGS   = -std=c99 $(OPTLEVEL) $(WARNINGS) $(EXTRAS)
 CXX      = g++
