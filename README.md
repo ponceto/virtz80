@@ -185,9 +185,9 @@ Tests complete
 
 ## LICENSING
 
-The whole project is released under the `GPLv2` license.
-
 ### Z80 emulator
+
+This project is released under the `GPLv2` license.
 
 ```
 Z80 emulator - Copyright (c) 2001-2025 - Olivier Poncet
@@ -208,6 +208,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 ### Z80 instruction set exerciser
 
+The Z80 instruction set exerciser is released under the `GPLv2` license.
+
 ```
 Z80 instruction set exerciser - Copyright (c) 1994 - Frank D. Cringle
 
@@ -226,6 +228,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 ```
 
 ### CP/M bdos emulation
+
+The CP/M bdos emulation is released under the `GPLv2` license.
 
 ```
 CP/M bdos emulation - Copyright (c) 2009 - Kevin Horton
