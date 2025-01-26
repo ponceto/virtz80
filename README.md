@@ -183,7 +183,7 @@ ld (<bc,de>),a................  OK
 Tests complete
 ```
 
-## LICENSES
+## LICENSING
 
 The whole project is released under the `GPLv2` license.
 
