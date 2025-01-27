@@ -122,13 +122,11 @@ auto Program::init(const ArgList& args) -> bool
 
 auto Program::main(const ArgList& args) -> void
 {
-    std::unique_ptr<VirtualMachine> vm;
-
     auto do_main = [&]() -> void
     {
-        vm = std::make_unique<VirtualMachine>();
+        const std::unique_ptr<Application> app(new VirtualMachine());
 
-        return vm->main();
+        return app->main();
     };
 
     return do_main();
