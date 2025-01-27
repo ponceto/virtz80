@@ -33,29 +33,13 @@
 #include "machine.h"
 
 // ---------------------------------------------------------------------------
-// base::VirtualMachine
-// ---------------------------------------------------------------------------
-
-namespace base {
-
-VirtualMachine::VirtualMachine(const std::string& name)
-    : _name(name)
-    , _stop(false)
-    , _istream(stdin)
-    , _ostream(stdout)
-{
-}
-
-}
-
-// ---------------------------------------------------------------------------
 // core::VirtualMachine
 // ---------------------------------------------------------------------------
 
 namespace core {
 
 VirtualMachine::VirtualMachine()
-    : base::VirtualMachine("virtz80")
+    : Application("virtz80")
     , _state()
     , _cpu(*this)
     , _mmu(*this)
@@ -65,21 +49,21 @@ VirtualMachine::VirtualMachine()
 
 auto VirtualMachine::main() -> void
 {
-    if(_stop == false) {
+    if(_quit == false) {
         reset();
         do {
             clock();
-        } while(_stop == false);
+        } while(_quit == false);
     }
     if((_state.ochar != '\0') && (_state.ochar != '\n')) {
         static_cast<void>(wr_char('\n'));
     }
 }
 
-auto VirtualMachine::stop() -> void
+auto VirtualMachine::quit() -> void
 {
-    if(_stop == false) {
-        _stop = true;
+    if(_quit == false) {
+        _quit = true;
     }
 }
 
@@ -129,7 +113,7 @@ auto VirtualMachine::reset() -> void
 
 auto VirtualMachine::clock() -> void
 {
-    if(_stop == false) {
+    if(_quit == false) {
         bool done = false;
         do {
             _cpu.clock();
@@ -141,7 +125,7 @@ auto VirtualMachine::clock() -> void
                 _state.vcntr -= _state.clock;
                 done |= true;
             }
-        } while((done |= _stop) == false);
+        } while((done |= _quit) == false);
     }
 }
 
@@ -210,7 +194,7 @@ auto VirtualMachine::pmu_ctrl_wr(pmu::Instance& pmu, uint8_t data) -> uint8_t
 {
     if(data == 0x00) {
         if(++_state.hltrq >= 2) {
-            stop();
+            quit();
         }
     }
     return data;

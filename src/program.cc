@@ -31,8 +31,8 @@
 #include <stdexcept>
 #include "console.h"
 #include "globals.h"
-#include "program.h"
 #include "machine.h"
+#include "program.h"
 
 // ---------------------------------------------------------------------------
 // core::Program

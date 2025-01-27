@@ -17,39 +17,10 @@
 #ifndef __CORE_Machine_h__
 #define __CORE_Machine_h__
 
+#include "application.h"
 #include "emu/cpu/cpu-core.h"
 #include "emu/mmu/mmu-core.h"
 #include "emu/pmu/pmu-core.h"
-
-// ---------------------------------------------------------------------------
-// base::VirtualMachine
-// ---------------------------------------------------------------------------
-
-namespace base {
-
-class VirtualMachine
-{
-public: // public interface
-    VirtualMachine(const std::string& name);
-
-    VirtualMachine(const VirtualMachine&) = delete;
-
-    VirtualMachine& operator=(const VirtualMachine&) = delete;
-
-    virtual ~VirtualMachine() = default;
-
-    virtual auto main() -> void = 0;
-
-    virtual auto stop() -> void = 0;
-
-protected: // protected data
-    const std::string _name;
-    bool              _stop;
-    FILE*             _istream;
-    FILE*             _ostream;
-};
-
-}
 
 // ---------------------------------------------------------------------------
 // core::VirtualMachine
@@ -58,7 +29,7 @@ protected: // protected data
 namespace core {
 
 class VirtualMachine final
-    : public base::VirtualMachine
+    : public Application
     , private cpu::Interface
     , private mmu::Interface
     , private pmu::Interface
@@ -74,13 +45,13 @@ public: // public interface
 
     virtual auto main() -> void override final;
 
-    virtual auto stop() -> void override final;
+    virtual auto quit() -> void override final;
 
+private: // private interface
     auto reset() -> void;
 
     auto clock() -> void;
 
-private: // private interface
     auto rd_char(int character = '\0') -> uint8_t;
 
     auto wr_char(int character = '\0') -> uint8_t;
@@ -104,7 +75,7 @@ private: // private mmu interface
 private: // private pmu interface
     virtual auto pmu_ctrl_wr(pmu::Instance& pmu, uint8_t data) -> uint8_t override final;
 
-private: // private data
+private: // private types
     struct State
     {
         uint32_t clock = 4000000; /* master cpu clock */

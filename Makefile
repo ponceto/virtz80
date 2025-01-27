@@ -65,6 +65,7 @@ clean: clean_virtz80
 virtz80_PROGRAM = virtz80.bin
 
 virtz80_SOURCES = \
+	src/application.cc \
 	src/console.cc \
 	src/globals.cc \
 	src/program.cc \
@@ -75,6 +76,7 @@ virtz80_SOURCES = \
 	$(NULL)
 
 virtz80_HEADERS = \
+	src/application.h \
 	src/console.h \
 	src/globals.h \
 	src/program.h \
@@ -85,6 +87,7 @@ virtz80_HEADERS = \
 	$(NULL)
 
 virtz80_OBJECTS = \
+	src/application.o \
 	src/console.o \
 	src/globals.o \
 	src/program.o \
