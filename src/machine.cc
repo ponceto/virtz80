@@ -28,7 +28,6 @@
 #include <vector>
 #include <iostream>
 #include <stdexcept>
-#include "console.h"
 #include "globals.h"
 #include "machine.h"
 
@@ -40,6 +39,8 @@ namespace core {
 
 VirtualMachine::VirtualMachine()
     : Application("virtz80")
+    , _istream(stdin)
+    , _ostream(stdout)
     , _state()
     , _cpu(*this)
     , _mmu(*this)

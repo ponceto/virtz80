@@ -29,20 +29,17 @@
 #include <vector>
 #include <iostream>
 #include <stdexcept>
-#include "console.h"
 #include "globals.h"
 #include "machine.h"
 #include "program.h"
 
 // ---------------------------------------------------------------------------
-// core::Program
+// some useful utilities
 // ---------------------------------------------------------------------------
 
-namespace core {
+namespace {
 
-namespace detail {
-
-auto program_name(const ArgList& args) -> const char*
+auto program_name(const core::ArgList& args) -> const char*
 {
     const char* arg = args[0].c_str();
     const char* sep = ::strrchr(arg, '/');
@@ -80,6 +77,12 @@ auto arg_val(const std::string& argument) -> std::string
 
 }
 
+// ---------------------------------------------------------------------------
+// core::Program
+// ---------------------------------------------------------------------------
+
+namespace core {
+
 auto Program::init(const ArgList& args) -> bool
 {
     static const std::locale new_locale("");
@@ -98,17 +101,17 @@ auto Program::init(const ArgList& args) -> bool
             else if(arg == "--help") {
                 return false;
             }
-            else if(detail::arg_is(arg, "--bank0")) {
-                Globals::bank0 = detail::arg_val(arg);
+            else if(arg_is(arg, "--bank0")) {
+                Globals::bank0 = arg_val(arg);
             }
-            else if(detail::arg_is(arg, "--bank1")) {
-                Globals::bank1 = detail::arg_val(arg);
+            else if(arg_is(arg, "--bank1")) {
+                Globals::bank1 = arg_val(arg);
             }
-            else if(detail::arg_is(arg, "--bank2")) {
-                Globals::bank2 = detail::arg_val(arg);
+            else if(arg_is(arg, "--bank2")) {
+                Globals::bank2 = arg_val(arg);
             }
-            else if(detail::arg_is(arg, "--bank3")) {
-                Globals::bank3 = detail::arg_val(arg);
+            else if(arg_is(arg, "--bank3")) {
+                Globals::bank3 = arg_val(arg);
             }
             else {
                 throw std::runtime_error(std::string("invalid argument") + ' ' + '\'' + arg + '\'');
@@ -124,7 +127,7 @@ auto Program::main(const ArgList& args) -> void
 {
     auto do_main = [&]() -> void
     {
-        const std::unique_ptr<Application> app(new VirtualMachine());
+        const std::unique_ptr<base::Application> app(new VirtualMachine());
 
         return app->main();
     };
@@ -136,7 +139,7 @@ auto Program::help(const ArgList& args) -> void
 {
     auto do_help = [&](std::ostream& stream) -> void
     {
-        stream << "Usage: " << detail::program_name(args) << " [OPTIONS...]"         << std::endl;
+        stream << "Usage: " << program_name(args) << " [OPTIONS...]"                 << std::endl;
         stream << ""                                                                 << std::endl;
         stream << "Options:"                                                         << std::endl;
         stream << ""                                                                 << std::endl;
@@ -165,6 +168,7 @@ auto Program::help(const ArgList& args) -> void
 // main
 // ---------------------------------------------------------------------------
 
+using namespace base;
 using namespace core;
 
 int main(int argc, char* argv[])

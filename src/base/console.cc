@@ -31,10 +31,10 @@
 #include "console.h"
 
 // ---------------------------------------------------------------------------
-// core::Console
+// base::Console
 // ---------------------------------------------------------------------------
 
-namespace core {
+namespace base {
 
 auto Console::trace(const char* format, ...) -> void
 {

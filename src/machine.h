@@ -17,7 +17,8 @@
 #ifndef __CORE_Machine_h__
 #define __CORE_Machine_h__
 
-#include "application.h"
+#include "base/console.h"
+#include "base/application.h"
 #include "emu/cpu/cpu-core.h"
 #include "emu/mmu/mmu-core.h"
 #include "emu/pmu/pmu-core.h"
@@ -29,7 +30,7 @@
 namespace core {
 
 class VirtualMachine final
-    : public Application
+    : public base::Application
     , private cpu::Interface
     , private mmu::Interface
     , private pmu::Interface
@@ -89,6 +90,8 @@ private: // private types
     };
 
 private: // private data
+    FILE*         _istream;
+    FILE*         _ostream;
     State         _state;
     cpu::Instance _cpu;
     mmu::Instance _mmu;

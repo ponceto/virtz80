@@ -31,16 +31,14 @@
 #include "application.h"
 
 // ---------------------------------------------------------------------------
-// core::Application
+// base::Application
 // ---------------------------------------------------------------------------
 
-namespace core {
+namespace base {
 
 Application::Application(const std::string& name)
     : _name(name)
     , _quit(false)
-    , _istream(stdin)
-    , _ostream(stdout)
 {
 }
 

@@ -1,5 +1,5 @@
 /*
- * application.h - Copyright (c) 2001-2025 - Olivier Poncet
+ * console.h - Copyright (c) 2001-2025 - Olivier Poncet
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,35 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __CORE_Application_h__
-#define __CORE_Application_h__
+#ifndef __BASE_Console_h__
+#define __BASE_Console_h__
 
 // ---------------------------------------------------------------------------
-// core::Application
+// base::Console
 // ---------------------------------------------------------------------------
 
-namespace core {
+namespace base {
 
-class Application
+struct Console
 {
-public: // public interface
-    Application(const std::string& name);
+    static auto trace(const char* format, ...) -> void;
 
-    Application(const Application&) = default;
+    static auto debug(const char* format, ...) -> void;
 
-    Application& operator=(const Application&) = default;
+    static auto print(const char* format, ...) -> void;
 
-    virtual ~Application() = default;
+    static auto alert(const char* format, ...) -> void;
 
-    virtual auto main() -> void = 0;
+    static auto error(const char* format, ...) -> void;
 
-    virtual auto quit() -> void = 0;
-
-protected: // protected data
-    const std::string _name;
-    bool              _quit;
-    FILE*             _istream;
-    FILE*             _ostream;
+    static auto fatal(const char* format, ...) -> void;
 };
 
 }
@@ -51,4 +44,4 @@ protected: // protected data
 // End-Of-File
 // ---------------------------------------------------------------------------
 
-#endif /* __CORE_Application_h__ */
+#endif /* __BASE_Console_h__ */
