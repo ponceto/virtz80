@@ -38,7 +38,7 @@
 namespace core {
 
 VirtualMachine::VirtualMachine()
-    : Application("virtz80")
+    : base::Application("virtz80")
     , _istream(stdin)
     , _ostream(stdout)
     , _state()
