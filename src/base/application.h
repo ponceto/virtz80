@@ -28,15 +28,25 @@ class Application
 public: // public interface
     Application(const std::string& name);
 
-    Application(const Application&) = default;
+    Application(const Application&) = delete;
 
-    Application& operator=(const Application&) = default;
+    Application& operator=(const Application&) = delete;
 
     virtual ~Application() = default;
 
     virtual auto main() -> void = 0;
 
     virtual auto quit() -> void = 0;
+
+    auto running() const -> bool
+    {
+        return _quit == false;
+    }
+
+    auto stopped() const -> bool
+    {
+        return _quit != false;
+    }
 
 protected: // protected data
     const std::string _name;

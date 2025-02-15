@@ -23,11 +23,16 @@
 #include <cstring>
 #include <cstdint>
 #include <cstdarg>
+#include <chrono>
+#include <thread>
 #include <memory>
 #include <string>
 #include <vector>
 #include <iostream>
 #include <stdexcept>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 #include "globals.h"
 
 // ---------------------------------------------------------------------------
@@ -36,10 +41,22 @@
 
 namespace core {
 
-std::string Globals::bank0("assets/bank0.bin");
-std::string Globals::bank1("assets/bank1.bin");
-std::string Globals::bank2("assets/bank2.bin");
-std::string Globals::bank3("assets/bank3.bin");
+std::string Globals::bank0("assets/bank0.rom");
+std::string Globals::bank1("assets/bank1.rom");
+std::string Globals::bank2("assets/bank2.rom");
+std::string Globals::bank3("assets/bank3.rom");
+
+}
+
+// ---------------------------------------------------------------------------
+// core::Globals
+// ---------------------------------------------------------------------------
+
+namespace core {
+
+auto Globals::init() -> void
+{
+}
 
 }
 

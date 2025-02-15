@@ -24,14 +24,19 @@
 #include <cstdint>
 #include <cstdarg>
 #include <locale>
+#include <chrono>
+#include <thread>
 #include <memory>
 #include <string>
 #include <vector>
 #include <iostream>
 #include <stdexcept>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 #include "globals.h"
-#include "machine.h"
 #include "program.h"
+#include "emulator.h"
 
 // ---------------------------------------------------------------------------
 // some useful utilities
@@ -44,7 +49,7 @@ auto program_name(const core::ArgList& args) -> const char*
     const char* arg = args[0].c_str();
     const char* sep = ::strrchr(arg, '/');
     if(sep != nullptr) {
-        arg = sep + 1;
+        arg = (sep + 1);
     }
     return arg;
 }
@@ -70,7 +75,7 @@ auto arg_val(const std::string& argument) -> std::string
     const char* equ = ::strchr(arg, '=');
     const char* val = "";
     if(equ != nullptr) {
-        val = equ + 1;
+        val = (equ + 1);
     }
     return val;
 }
@@ -88,7 +93,7 @@ auto Program::init(const ArgList& args) -> bool
     static const std::locale new_locale("");
     static const std::locale old_locale(std::locale::global(new_locale));
 
-    auto do_init = [&]() -> bool
+    auto do_parse = [&]() -> bool
     {
         int argi = -1;
         for(auto& arg : args) {
@@ -120,19 +125,58 @@ auto Program::init(const ArgList& args) -> bool
         return true;
     };
 
+    auto do_init = [&]() -> bool
+    {
+        Globals::init();
+
+        return do_parse();
+    };
+
     return do_init();
 }
 
 auto Program::main(const ArgList& args) -> void
 {
-    auto do_main = [&]() -> void
-    {
-        const std::unique_ptr<base::Application> app(new VirtualMachine());
+    std::unique_ptr<base::Application> application(new Emulator());
 
-        return app->main();
+#ifdef __EMSCRIPTEN__
+    auto em_main_loop = +[](void* data) -> void
+    {
+        auto* application(reinterpret_cast<base::Application*>(data));
+
+        if(application->running()) {
+            application->main();
+        }
+        else {
+            application = (delete application, nullptr);
+            ::emscripten_cancel_main_loop();
+        }
+    };
+#endif
+
+    auto main_loop = [&]() -> void
+    {
+#ifdef __EMSCRIPTEN__
+        ::emscripten_set_main_loop_arg(em_main_loop, application.release(), 0, 1);
+#else
+        if(bool(application) != false) {
+            application->main();
+        }
+#endif
     };
 
-    return do_main();
+    auto do_main = [&](std::ostream& stream) -> void
+    {
+        stream << "bank0" << " ... " << Globals::bank0 << std::endl;
+        stream << "bank1" << " ... " << Globals::bank1 << std::endl;
+        stream << "bank2" << " ... " << Globals::bank2 << std::endl;
+        stream << "bank3" << " ... " << Globals::bank3 << std::endl;
+        stream << ""                                   << std::endl;
+
+        return main_loop();
+    };
+
+    return do_main(std::cout);
 }
 
 auto Program::help(const ArgList& args) -> void

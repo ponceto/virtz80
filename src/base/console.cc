@@ -23,11 +23,16 @@
 #include <cstring>
 #include <cstdint>
 #include <cstdarg>
+#include <chrono>
+#include <thread>
 #include <memory>
 #include <string>
 #include <vector>
 #include <iostream>
 #include <stdexcept>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 #include "console.h"
 
 // ---------------------------------------------------------------------------

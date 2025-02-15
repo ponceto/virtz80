@@ -23,7 +23,6 @@
 
 namespace pmu {
 
-class State;
 class Instance;
 class Interface;
 
@@ -51,7 +50,7 @@ namespace pmu {
 class Instance
 {
 public: // public interface
-    Instance(Interface& interface);
+    Instance(Interface&);
 
     Instance(const Instance&) = delete;
 
@@ -96,7 +95,7 @@ public: // public interface
 
     virtual ~Interface() = default;
 
-    virtual auto pmu_ctrl_wr(Instance& instance, uint8_t data) -> uint8_t = 0;
+    virtual auto pmu_ctrl_wr(Instance&, uint8_t data) -> uint8_t = 0;
 };
 
 }

@@ -32,13 +32,13 @@
 #include "machine.h"
 
 // ---------------------------------------------------------------------------
-// core::VirtualMachine
+// emu::MachineInstance
 // ---------------------------------------------------------------------------
 
-namespace core {
+namespace emu {
 
-VirtualMachine::VirtualMachine()
-    : base::Application("virtz80")
+MachineInstance::MachineInstance(MachineInterface& interface)
+    : _interface(interface)
     , _istream(stdin)
     , _ostream(stdout)
     , _state()
@@ -48,38 +48,26 @@ VirtualMachine::VirtualMachine()
 {
 }
 
-auto VirtualMachine::main() -> void
+MachineInstance::~MachineInstance()
 {
-    if(_quit == false) {
-        reset();
-        do {
-            clock();
-        } while(_quit == false);
-    }
     if((_state.ochar != '\0') && (_state.ochar != '\n')) {
         static_cast<void>(wr_char('\n'));
     }
 }
 
-auto VirtualMachine::quit() -> void
-{
-    if(_quit == false) {
-        _quit = true;
-    }
-}
-
-auto VirtualMachine::reset() -> void
+auto MachineInstance::reset() -> void
 {
     auto reset_state = [&]() -> void
     {
-        _state.clock |= 0; // don't reset
-        _state.hfreq |= 0; // don't reset
-        _state.vfreq |= 0; // don't reset
-        _state.hcntr &= 0; // reset value
-        _state.vcntr &= 0; // reset value
-        _state.hltrq &= 0; // reset value
-        _state.ichar &= 0; // reset value
-        _state.ochar &= 0; // reset value
+        _state.clock   |= 0;     // don't reset
+        _state.hfreq   |= 0;     // don't reset
+        _state.vfreq   |= 0;     // don't reset
+        _state.hcntr   &= 0;     // reset value
+        _state.vcntr   &= 0;     // reset value
+        _state.hltrq   &= 0;     // reset value
+        _state.ichar   &= 0;     // reset value
+        _state.ochar   &= 0;     // reset value
+        _state.stopped &= false; // reset value
     };
 
     auto reset_cpu = [&]() -> void
@@ -90,10 +78,10 @@ auto VirtualMachine::reset() -> void
     auto reset_mmu = [&]() -> void
     {
         _mmu.reset();
-        _mmu.load_bank(Globals::bank0, 0);
-        _mmu.load_bank(Globals::bank1, 1);
-        _mmu.load_bank(Globals::bank2, 2);
-        _mmu.load_bank(Globals::bank3, 3);
+        _mmu.load_bank(core::Globals::bank0, 0);
+        _mmu.load_bank(core::Globals::bank1, 1);
+        _mmu.load_bank(core::Globals::bank2, 2);
+        _mmu.load_bank(core::Globals::bank3, 3);
     };
 
     auto reset_pmu = [&]() -> void
@@ -112,10 +100,11 @@ auto VirtualMachine::reset() -> void
     return reset_all();
 }
 
-auto VirtualMachine::clock() -> void
+auto MachineInstance::clock() -> void
 {
-    if(_quit == false) {
-        bool done = false;
+    bool done = false;
+
+    if((done |= _state.stopped) == false) {
         do {
             _cpu.clock();
             if((_state.hcntr += _state.hfreq) >= _state.clock) {
@@ -126,11 +115,11 @@ auto VirtualMachine::clock() -> void
                 _state.vcntr -= _state.clock;
                 done |= true;
             }
-        } while((done |= _quit) == false);
+        } while((done |= _state.stopped) == false);
     }
 }
 
-auto VirtualMachine::rd_char(int character) -> uint8_t
+auto MachineInstance::rd_char(int character) -> uint8_t
 {
     if((character = ::fgetc(_istream)) != EOF) {
     //  static_cast<void>(::fflush(_istream));
@@ -142,7 +131,7 @@ auto VirtualMachine::rd_char(int character) -> uint8_t
     return _state.ichar;
 }
 
-auto VirtualMachine::wr_char(int character) -> uint8_t
+auto MachineInstance::wr_char(int character) -> uint8_t
 {
     if((character = ::fputc(character, _ostream)) != EOF) {
         static_cast<void>(::fflush(_ostream));
@@ -154,48 +143,49 @@ auto VirtualMachine::wr_char(int character) -> uint8_t
     return _state.ochar;
 }
 
-auto VirtualMachine::cpu_mreq_m1(cpu::Instance& cpu, uint16_t addr, uint8_t data) -> uint8_t
+auto MachineInstance::cpu_mreq_m1(cpu::Instance& cpu, uint16_t addr, uint8_t data) -> uint8_t
 {
     return _mmu.rd_byte(addr, data);
 }
 
-auto VirtualMachine::cpu_mreq_rd(cpu::Instance& cpu, uint16_t addr, uint8_t data) -> uint8_t
+auto MachineInstance::cpu_mreq_rd(cpu::Instance& cpu, uint16_t addr, uint8_t data) -> uint8_t
 {
     return _mmu.rd_byte(addr, data);
 }
 
-auto VirtualMachine::cpu_mreq_wr(cpu::Instance& cpu, uint16_t addr, uint8_t data) -> uint8_t
+auto MachineInstance::cpu_mreq_wr(cpu::Instance& cpu, uint16_t addr, uint8_t data) -> uint8_t
 {
     return _mmu.wr_byte(addr, data);
 }
 
-auto VirtualMachine::cpu_iorq_m1(cpu::Instance& cpu, uint16_t port, uint8_t data) -> uint8_t
+auto MachineInstance::cpu_iorq_m1(cpu::Instance& cpu, uint16_t port, uint8_t data) -> uint8_t
 {
     return _pmu.rd_byte(port, data);
 }
 
-auto VirtualMachine::cpu_iorq_rd(cpu::Instance& cpu, uint16_t port, uint8_t data) -> uint8_t
+auto MachineInstance::cpu_iorq_rd(cpu::Instance& cpu, uint16_t port, uint8_t data) -> uint8_t
 {
     return _pmu.rd_byte(port, data);
 }
 
-auto VirtualMachine::cpu_iorq_wr(cpu::Instance& cpu, uint16_t port, uint8_t data) -> uint8_t
+auto MachineInstance::cpu_iorq_wr(cpu::Instance& cpu, uint16_t port, uint8_t data) -> uint8_t
 {
     return _pmu.wr_byte(port, data);
 }
 
-auto VirtualMachine::mmu_char_wr(mmu::Instance& mmu, uint8_t data) -> uint8_t
+auto MachineInstance::mmu_char_wr(mmu::Instance& mmu, uint8_t data) -> uint8_t
 {
     static_cast<void>(wr_char(data));
 
     return data;
 }
 
-auto VirtualMachine::pmu_ctrl_wr(pmu::Instance& pmu, uint8_t data) -> uint8_t
+auto MachineInstance::pmu_ctrl_wr(pmu::Instance& pmu, uint8_t data) -> uint8_t
 {
     if(data == 0x00) {
         if(++_state.hltrq >= 2) {
-            quit();
+            _state.stopped = true;
+            _interface.quit();
         }
     }
     return data;

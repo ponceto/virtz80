@@ -1,5 +1,5 @@
 #
-# Makefile - Copyright (c) 2001-2025 - Olivier Poncet
+# Makefile.wasm - Copyright (c) 2001-2025 - Olivier Poncet
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,21 +20,22 @@
 # ----------------------------------------------------------------------------
 
 TOPDIR   = $(CURDIR)
-OPTLEVEL = -O2 -g
+OPTLEVEL = -O2
 WARNINGS = -Wall
-EXTRAS   = -pthread
-CC       = gcc
+EXTRAS   = -pthread -sUSE_PTHREADS=1
+CC       = emcc
 CFLAGS   = -std=c99 $(OPTLEVEL) $(WARNINGS) $(EXTRAS)
-CXX      = g++
+CXX      = em++
 CXXFLAGS = -std=c++14 $(OPTLEVEL) $(WARNINGS) $(EXTRAS)
 CPP      = cpp
 CPPFLAGS = -I. -I$(TOPDIR)/src -D_DEFAULT_SOURCE -D_FORTIFY_SOURCE=2 -DLSB_FIRST
-LD       = g++
+LD       = em++
 LDFLAGS  = -L.
 CP       = cp
 CPFLAGS  = -f
 RM       = rm
 RMFLAGS  = -f
+PYTHON   = python3
 
 # ----------------------------------------------------------------------------
 # default rules
@@ -58,11 +59,14 @@ build: build_virtz80
 clean: clean_virtz80
 	@echo "=== $@ ok ==="
 
+serve: serve_virtz80
+	@echo "=== $@ ok ==="
+
 # ----------------------------------------------------------------------------
 # virtz80 files
 # ----------------------------------------------------------------------------
 
-virtz80_PROGRAM = virtz80.bin
+virtz80_PROGRAM = virtz80.html
 
 virtz80_SOURCES = \
 	src/base/application.cc \
@@ -101,6 +105,11 @@ virtz80_OBJECTS = \
 	$(NULL)
 
 virtz80_LDFLAGS = \
+	--use-preload-plugins \
+	--preload-file assets/bank0.rom \
+	--preload-file assets/bank1.rom \
+	--preload-file assets/bank2.rom \
+	--preload-file assets/bank3.rom \
 	$(NULL)
 
 virtz80_LDADD = \
@@ -131,6 +140,13 @@ $(virtz80_PROGRAM): $(virtz80_OBJECTS)
 
 clean_virtz80:
 	$(RM) $(RMFLAGS) $(virtz80_OBJECTS) $(virtz80_PROGRAM) $(virtz80_CLEANFILES)
+
+# ----------------------------------------------------------------------------
+# serve virtz80
+# ----------------------------------------------------------------------------
+
+serve_virtz80:
+	$(PYTHON) -m http.server
 
 # ----------------------------------------------------------------------------
 # End-Of-File

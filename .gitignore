@@ -1,2 +1,8 @@
-*.bin
 *.o
+*.bin
+*.a
+*.o
+virtz80.html
+virtz80.js
+virtz80.wasm
+virtz80.data

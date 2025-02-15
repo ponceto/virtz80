@@ -38,6 +38,8 @@ Under Debian and derivatives (Ubuntu, Mint, ...):
 apt-get install build-essential
 ```
 
+In order to build the [WASM](https://en.wikipedia.org/wiki/WebAssembly) version, you must install [Emscripten](https://emscripten.org/) on your system.
+
 ### Configure the project
 
 The project is preconfigured for a `little endian` target architecture (least significant byte first, eg. `x86_64`).
@@ -52,7 +54,7 @@ E	the endianess was not set correctly
 
 ### Build the project
 
-To build the project, just type:
+To build the project, simply type:
 
 ```
 make
@@ -64,12 +66,24 @@ You can also use the `-j` option if you want to build in parallel with `GNU make
 make -j{number-of-jobs}
 ```
 
+To build the WASM version, please use `Makefile.wasm`:
+
+```
+make -f Makefile.wasm
+```
+
 ### Clean the project
 
-To clean the project, just type:
+To clean the project, simply type:
 
 ```
 make clean
+```
+
+To clean the WASM version, please use `Makefile.wasm`:
+
+```
+make -f Makefile.wasm clean
 ```
 
 ## HOW TO RUN
@@ -94,14 +108,14 @@ Options:
 
 Values:
 
-  Bank #0: assets/bank0.bin
-  Bank #1: assets/bank1.bin
-  Bank #2: assets/bank2.bin
-  Bank #3: assets/bank3.bin
+  Bank #0: assets/bank0.rom
+  Bank #1: assets/bank1.rom
+  Bank #2: assets/bank2.rom
+  Bank #3: assets/bank3.rom
 
 ```
 
-### Execute
+### Run
 
 Run the virtual machine:
 
@@ -182,6 +196,16 @@ ld (<ix,iy>+1),a..............  OK
 ld (<bc,de>),a................  OK
 Tests complete
 ```
+
+### Run the WASM version
+
+To run the WASM version, you can use the Python built-in http server:
+
+```
+python3 -m http.server
+```
+
+Then open your browser and point to [localhost/virtz80.html](http://127.0.0.1:8000/virtz80.html)
 
 ## LICENSING
 

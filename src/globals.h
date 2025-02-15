@@ -25,6 +25,8 @@ namespace core {
 
 struct Globals
 {
+    static auto init() -> void;
+
     static std::string bank0;
     static std::string bank1;
     static std::string bank2;

@@ -1,5 +1,5 @@
 /*
- * application.cc - Copyright (c) 2001-2025 - Olivier Poncet
+ * emulator.cc - Copyright (c) 2001-2025 - Olivier Poncet
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,18 +33,37 @@
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
-#include "application.h"
+#include "globals.h"
+#include "emulator.h"
 
 // ---------------------------------------------------------------------------
-// base::Application
+// core::Emulator
 // ---------------------------------------------------------------------------
 
-namespace base {
+namespace core {
 
-Application::Application(const std::string& name)
-    : _name(name)
-    , _quit(false)
+Emulator::Emulator()
+    : base::Application("virtz80")
+    , _vm(*this)
 {
+    _vm.reset();
+}
+
+auto Emulator::main() -> void
+{
+    while(_quit == false) {
+        _vm.clock();
+#ifdef __EMSCRIPTEN__
+        break;
+#endif
+    }
+}
+
+auto Emulator::quit() -> void
+{
+    if(_quit == false) {
+        _quit = true;
+    }
 }
 
 }

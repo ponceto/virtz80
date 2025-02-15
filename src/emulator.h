@@ -1,5 +1,5 @@
 /*
- * application.cc - Copyright (c) 2001-2025 - Olivier Poncet
+ * emulator.h - Copyright (c) 2001-2025 - Olivier Poncet
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,41 +14,55 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cstdint>
-#include <cstdarg>
-#include <chrono>
-#include <thread>
-#include <memory>
-#include <string>
-#include <vector>
-#include <iostream>
-#include <stdexcept>
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#endif
-#include "application.h"
+#ifndef __CORE_Emulator_h__
+#define __CORE_Emulator_h__
+
+#include "base/console.h"
+#include "base/application.h"
+#include "emu/machine.h"
 
 // ---------------------------------------------------------------------------
-// base::Application
+// aliases
 // ---------------------------------------------------------------------------
 
-namespace base {
+namespace core {
 
-Application::Application(const std::string& name)
-    : _name(name)
-    , _quit(false)
-{
+using VirtualMachine      = emu::MachineInstance;
+using VirtualMachineIface = emu::MachineInterface;
+
 }
+
+// ---------------------------------------------------------------------------
+// core::Emulator
+// ---------------------------------------------------------------------------
+
+namespace core {
+
+class Emulator final
+    : public base::Application
+    , private VirtualMachineIface
+{
+public: // public interface
+    Emulator();
+
+    Emulator(const Emulator&) = delete;
+
+    Emulator& operator=(const Emulator&) = delete;
+
+    virtual ~Emulator() = default;
+
+    virtual auto main() -> void override final;
+
+    virtual auto quit() -> void override final;
+
+private: // private data
+    VirtualMachine _vm;
+};
 
 }
 
 // ---------------------------------------------------------------------------
 // End-Of-File
 // ---------------------------------------------------------------------------
+
+#endif /* __CORE_Emulator_h__ */
