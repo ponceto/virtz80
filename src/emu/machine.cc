@@ -59,14 +59,15 @@ auto MachineInstance::reset() -> void
 {
     auto reset_state = [&]() -> void
     {
-        _state.clock |= 0; // don't reset
-        _state.hfreq |= 0; // don't reset
-        _state.vfreq |= 0; // don't reset
-        _state.hcntr &= 0; // reset value
-        _state.vcntr &= 0; // reset value
-        _state.hltrq &= 0; // reset value
-        _state.ichar &= 0; // reset value
-        _state.ochar &= 0; // reset value
+        _state.clock   |= 0;     // don't reset
+        _state.hfreq   |= 0;     // don't reset
+        _state.vfreq   |= 0;     // don't reset
+        _state.hcntr   &= 0;     // reset value
+        _state.vcntr   &= 0;     // reset value
+        _state.hltrq   &= 0;     // reset value
+        _state.ichar   &= 0;     // reset value
+        _state.ochar   &= 0;     // reset value
+        _state.stopped &= false; // reset value
     };
 
     auto reset_cpu = [&]() -> void
