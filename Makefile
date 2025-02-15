@@ -69,7 +69,8 @@ virtz80_SOURCES = \
 	src/base/console.cc \
 	src/globals.cc \
 	src/program.cc \
-	src/machine.cc \
+	src/emulator.cc \
+	src/emu/machine.cc \
 	src/emu/cpu/cpu-core.cc \
 	src/emu/mmu/mmu-core.cc \
 	src/emu/pmu/pmu-core.cc \
@@ -80,7 +81,8 @@ virtz80_HEADERS = \
 	src/base/console.h \
 	src/globals.h \
 	src/program.h \
-	src/machine.h \
+	src/emulator.h \
+	src/emu/machine.h \
 	src/emu/cpu/cpu-core.h \
 	src/emu/mmu/mmu-core.h \
 	src/emu/pmu/pmu-core.h \
@@ -91,7 +93,8 @@ virtz80_OBJECTS = \
 	src/base/console.o \
 	src/globals.o \
 	src/program.o \
-	src/machine.o \
+	src/emulator.o \
+	src/emu/machine.o \
 	src/emu/cpu/cpu-core.o \
 	src/emu/mmu/mmu-core.o \
 	src/emu/pmu/pmu-core.o \

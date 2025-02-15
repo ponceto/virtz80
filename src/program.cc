@@ -30,8 +30,8 @@
 #include <iostream>
 #include <stdexcept>
 #include "globals.h"
-#include "machine.h"
 #include "program.h"
+#include "emulator.h"
 
 // ---------------------------------------------------------------------------
 // some useful utilities
@@ -127,7 +127,7 @@ auto Program::main(const ArgList& args) -> void
 {
     auto do_main = [&]() -> void
     {
-        const std::unique_ptr<base::Application> app(new VirtualMachine());
+        const std::unique_ptr<base::Application> app(new Emulator());
 
         return app->main();
     };

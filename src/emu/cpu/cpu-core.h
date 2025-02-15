@@ -107,7 +107,7 @@ namespace cpu {
 class Instance
 {
 public: // public interface
-    Instance(Interface& interface);
+    Instance(Interface&);
 
     Instance(const Instance&) = delete;
 
@@ -152,17 +152,17 @@ public: // public interface
 
     virtual ~Interface() = default;
 
-    virtual auto cpu_mreq_m1(Instance& instance, uint16_t addr, uint8_t data) -> uint8_t = 0;
+    virtual auto cpu_mreq_m1(Instance&, uint16_t addr, uint8_t data) -> uint8_t = 0;
 
-    virtual auto cpu_mreq_rd(Instance& instance, uint16_t addr, uint8_t data) -> uint8_t = 0;
+    virtual auto cpu_mreq_rd(Instance&, uint16_t addr, uint8_t data) -> uint8_t = 0;
 
-    virtual auto cpu_mreq_wr(Instance& instance, uint16_t addr, uint8_t data) -> uint8_t = 0;
+    virtual auto cpu_mreq_wr(Instance&, uint16_t addr, uint8_t data) -> uint8_t = 0;
 
-    virtual auto cpu_iorq_m1(Instance& instance, uint16_t port, uint8_t data) -> uint8_t = 0;
+    virtual auto cpu_iorq_m1(Instance&, uint16_t port, uint8_t data) -> uint8_t = 0;
 
-    virtual auto cpu_iorq_rd(Instance& instance, uint16_t port, uint8_t data) -> uint8_t = 0;
+    virtual auto cpu_iorq_rd(Instance&, uint16_t port, uint8_t data) -> uint8_t = 0;
 
-    virtual auto cpu_iorq_wr(Instance& instance, uint16_t port, uint8_t data) -> uint8_t = 0;
+    virtual auto cpu_iorq_wr(Instance&, uint16_t port, uint8_t data) -> uint8_t = 0;
 };
 
 }

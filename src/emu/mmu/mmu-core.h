@@ -64,7 +64,7 @@ namespace mmu {
 class Instance
 {
 public: // public interface
-    Instance(Interface& interface);
+    Instance(Interface&);
 
     Instance(const Instance&) = delete;
 
@@ -113,7 +113,7 @@ public: // public interface
 
     virtual ~Interface() = default;
 
-    virtual auto mmu_char_wr(Instance& instance, uint8_t data) -> uint8_t = 0;
+    virtual auto mmu_char_wr(Instance&, uint8_t data) -> uint8_t = 0;
 };
 
 }
