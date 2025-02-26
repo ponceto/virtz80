@@ -45,6 +45,7 @@ MachineInstance::MachineInstance(MachineInterface& interface)
     , _cpu(*this)
     , _mmu(*this)
     , _pmu(*this)
+    , _vdu(*this)
 {
 }
 
@@ -59,15 +60,23 @@ auto MachineInstance::reset() -> void
 {
     auto reset_state = [&]() -> void
     {
-        _state.clock   |= 0;     // don't reset
-        _state.hfreq   |= 0;     // don't reset
-        _state.vfreq   |= 0;     // don't reset
-        _state.hcntr   &= 0;     // reset value
-        _state.vcntr   &= 0;     // reset value
-        _state.hltrq   &= 0;     // reset value
-        _state.ichar   &= 0;     // reset value
-        _state.ochar   &= 0;     // reset value
-        _state.stopped &= false; // reset value
+        _state.cpu_clock |= 0;
+        _state.cpu_ticks &= 0;
+        _state.vdu_clock |= 0;
+        _state.vdu_ticks &= 0;
+        _state.max_clock |= 0;
+        _state.hlt_req   &= 0;
+        _state.ichar     &= 0;
+        _state.ochar     &= 0;
+        _state.ready     &= false;
+        _state.stopped   &= false;
+
+        if(_state.cpu_clock >= _state.max_clock) {
+            _state.max_clock = _state.cpu_clock;
+        }
+        if(_state.vdu_clock >= _state.max_clock) {
+            _state.max_clock = _state.vdu_clock;
+        }
     };
 
     auto reset_cpu = [&]() -> void
@@ -89,12 +98,18 @@ auto MachineInstance::reset() -> void
         _pmu.reset();
     };
 
+    auto reset_vdu = [&]() -> void
+    {
+        _vdu.reset();
+    };
+
     auto reset_all = [&]() -> void
     {
         reset_state();
         reset_cpu();
         reset_mmu();
         reset_pmu();
+        reset_vdu();
     };
 
     return reset_all();
@@ -102,20 +117,20 @@ auto MachineInstance::reset() -> void
 
 auto MachineInstance::clock() -> void
 {
-    bool done = false;
-
-    if((done |= _state.stopped) == false) {
+    if((_state.ready = _state.stopped) == false) {
+        const uint32_t cpu_clock = _state.cpu_clock;
+        const uint32_t vdu_clock = _state.vdu_clock;
+        const uint32_t max_clock = _state.max_clock;
         do {
-            _cpu.clock();
-            if((_state.hcntr += _state.hfreq) >= _state.clock) {
-                _state.hcntr -= _state.clock;
-                done |= false;
+            if((_state.cpu_ticks += cpu_clock) >= max_clock) {
+                _state.cpu_ticks -= max_clock;
+                _cpu.clock();
             }
-            if((_state.vcntr += _state.vfreq) >= _state.clock) {
-                _state.vcntr -= _state.clock;
-                done |= true;
+            if((_state.vdu_ticks += vdu_clock) >= max_clock) {
+                _state.vdu_ticks -= max_clock;
+                _vdu.clock();
             }
-        } while((done |= _state.stopped) == false);
+        } while((_state.ready |= _state.stopped) == false);
     }
 }
 
@@ -133,6 +148,11 @@ auto MachineInstance::rd_char(int character) -> uint8_t
 
 auto MachineInstance::wr_char(int character) -> uint8_t
 {
+#ifdef __EMSCRIPTEN__
+    if(character == '\r') {
+        return character;
+    }
+#endif
     if((character = ::fputc(character, _ostream)) != EOF) {
         static_cast<void>(::fflush(_ostream));
         _state.ochar = character;
@@ -183,12 +203,22 @@ auto MachineInstance::mmu_char_wr(mmu::Instance& mmu, uint8_t data) -> uint8_t
 auto MachineInstance::pmu_ctrl_wr(pmu::Instance& pmu, uint8_t data) -> uint8_t
 {
     if(data == 0x00) {
-        if(++_state.hltrq >= 2) {
+        if(++_state.hlt_req >= 2) {
             _state.stopped = true;
             _interface.quit();
         }
     }
     return data;
+}
+
+auto MachineInstance::vdu_sync_hs(vdu::Instance& vdu, bool data) -> void
+{
+    _state.ready |= false;
+}
+
+auto MachineInstance::vdu_sync_vs(vdu::Instance& vdu, bool data) -> void
+{
+    _state.ready |= true;
 }
 
 }

@@ -137,18 +137,14 @@ auto Program::init(const ArgList& args) -> bool
 
 auto Program::main(const ArgList& args) -> void
 {
-    std::unique_ptr<base::Application> application(new Emulator());
-
 #ifdef __EMSCRIPTEN__
-    auto em_main_loop = +[](void* data) -> void
+    auto em_main_loop = +[](Emulator* emulator) -> void
     {
-        auto* application(reinterpret_cast<base::Application*>(data));
-
-        if(application->running()) {
-            application->main();
+        if(emulator->running()) {
+            emulator->main();
         }
         else {
-            application = (delete application, nullptr);
+            emulator = (delete emulator, nullptr);
             ::emscripten_cancel_main_loop();
         }
     };
@@ -156,12 +152,11 @@ auto Program::main(const ArgList& args) -> void
 
     auto main_loop = [&]() -> void
     {
+        std::unique_ptr<Emulator> emulator(new Emulator());
 #ifdef __EMSCRIPTEN__
-        ::emscripten_set_main_loop_arg(em_main_loop, application.release(), 0, 1);
+        ::emscripten_set_main_loop_arg(reinterpret_cast<em_arg_callback_func>(em_main_loop), emulator.release(), 0, 1);
 #else
-        if(bool(application) != false) {
-            application->main();
-        }
+        emulator->main();
 #endif
     };
 

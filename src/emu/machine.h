@@ -20,6 +20,7 @@
 #include "cpu/cpu-core.h"
 #include "mmu/mmu-core.h"
 #include "pmu/pmu-core.h"
+#include "vdu/vdu-core.h"
 
 // ---------------------------------------------------------------------------
 // forward declarations
@@ -42,6 +43,7 @@ class MachineInstance final
     : private cpu::Interface
     , private mmu::Interface
     , private pmu::Interface
+    , private vdu::Interface
 {
 public: // public interface
     MachineInstance(MachineInterface&);
@@ -80,18 +82,24 @@ private: // private mmu interface
 private: // private pmu interface
     virtual auto pmu_ctrl_wr(pmu::Instance&, uint8_t data) -> uint8_t override final;
 
+private: // private vdu interface
+    virtual auto vdu_sync_hs(vdu::Instance&, bool hsync) -> void override final;
+
+    virtual auto vdu_sync_vs(vdu::Instance&, bool vsync) -> void override final;
+
 private: // private types
     struct State
     {
-        uint32_t clock   = 4000000; /* master cpu clock  */
-        uint32_t hfreq   = 15625;   /* horz. frequency   */
-        uint32_t vfreq   = 50;      /* vert. frequency   */
-        uint32_t hcntr   = 0;       /* horz. counter     */
-        uint32_t vcntr   = 0;       /* vert. counter     */
-        uint32_t hltrq   = 0;       /* halt request      */
-        uint8_t  ichar   = 0;       /* last input char   */
-        uint8_t  ochar   = 0;       /* last output char  */
-        bool     stopped = false;   /* emulation stopped */
+        uint32_t cpu_clock = 4000000; /* cpu clock         */
+        uint32_t cpu_ticks = 0;       /* cpu ticks         */
+        uint32_t vdu_clock = 4134375; /* vdu clock         */
+        uint32_t vdu_ticks = 0;       /* vdu ticks         */
+        uint32_t max_clock = 0;       /* max clock         */
+        uint32_t hlt_req   = 0;       /* halt request      */
+        uint8_t  ichar     = 0;       /* last input char   */
+        uint8_t  ochar     = 0;       /* last output char  */
+        bool     ready     = false;   /* a frame is ready  */
+        bool     stopped   = false;   /* emulation stopped */
     };
 
 private: // private data
@@ -102,6 +110,7 @@ private: // private data
     cpu::Instance     _cpu;
     mmu::Instance     _mmu;
     pmu::Instance     _pmu;
+    vdu::Instance     _vdu;
 };
 
 }

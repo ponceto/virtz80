@@ -23,6 +23,7 @@ CPU: 1 x Z80 CPU
 RAM: 4 x 16kB
 MMU: 1 x Virtual MMU (Memory Management Unit)
 PMU: 1 x Virtual PMU (Peripheral Management Unit)
+VDU: 1 x Virtual VDU (Video Display Unit)
 I/O: 1 x Virtual Serial Output (memory mapped)
 ```
 
