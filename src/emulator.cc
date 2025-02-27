@@ -37,6 +37,14 @@
 #include "emulator.h"
 
 // ---------------------------------------------------------------------------
+// some clock/time type aliases
+// ---------------------------------------------------------------------------
+
+using clock_type      = std::chrono::steady_clock;
+using duration_type   = clock_type::duration;
+using time_point_type = clock_type::time_point;
+
+// ---------------------------------------------------------------------------
 // core::Emulator
 // ---------------------------------------------------------------------------
 
@@ -45,18 +53,32 @@ namespace core {
 Emulator::Emulator()
     : base::Application("virtz80")
     , _vm(*this)
+    , _ptime(clock_type::now())
+    , _ctime(clock_type::now())
+    , _dtime(0.0f)
 {
     _vm.reset();
 }
 
 auto Emulator::main() -> void
 {
-    while(_quit == false) {
+    auto loop = [&]() -> void
+    {
+        _ptime = _ctime;
+        _ctime = clock_type::now();
+        _dtime = std::chrono::duration<float>(_ctime - _ptime).count();
         _vm.clock();
+    };
+
 #ifdef __EMSCRIPTEN__
-        break;
-#endif
+    if(_quit == false) {
+        loop();
     }
+#else
+    while(_quit == false) {
+        loop();
+    }
+#endif
 }
 
 auto Emulator::quit() -> void

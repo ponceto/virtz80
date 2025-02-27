@@ -56,7 +56,15 @@ public: // public interface
     virtual auto quit() -> void override final;
 
 private: // private data
-    VirtualMachine _vm;
+    using clock_type      = std::chrono::steady_clock;
+    using duration_type   = clock_type::duration;
+    using time_point_type = clock_type::time_point;
+
+private: // private data
+    VirtualMachine  _vm;
+    time_point_type _ptime;
+    time_point_type _ctime;
+    float           _dtime;
 };
 
 }

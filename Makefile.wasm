@@ -22,7 +22,7 @@
 TOPDIR   = $(CURDIR)
 OPTLEVEL = -O2
 WARNINGS = -Wall
-EXTRAS   = -pthread -sUSE_PTHREADS=1
+EXTRAS   = -sUSE_ZLIB=1
 CC       = emcc
 CFLAGS   = -std=c99 $(OPTLEVEL) $(WARNINGS) $(EXTRAS)
 CXX      = em++
@@ -116,7 +116,6 @@ virtz80_LDFLAGS = \
 	$(NULL)
 
 virtz80_LDADD = \
-	-lpthread \
 	-lm \
 	$(NULL)
 
