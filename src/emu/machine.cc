@@ -39,9 +39,10 @@ namespace emu {
 
 MachineInstance::MachineInstance(MachineInterface& interface)
     : _interface(interface)
+    , _setup()
+    , _state()
     , _istream(stdin)
     , _ostream(stdout)
-    , _state()
     , _cpu(*this)
     , _mmu(*this)
     , _pmu(*this)
@@ -87,10 +88,10 @@ auto MachineInstance::reset() -> void
     auto reset_mmu = [&]() -> void
     {
         _mmu.reset();
-        _mmu.load_bank(core::Globals::bank0, 0);
-        _mmu.load_bank(core::Globals::bank1, 1);
-        _mmu.load_bank(core::Globals::bank2, 2);
-        _mmu.load_bank(core::Globals::bank3, 3);
+        _mmu.load_bank(_setup.bank0, 0);
+        _mmu.load_bank(_setup.bank1, 1);
+        _mmu.load_bank(_setup.bank2, 2);
+        _mmu.load_bank(_setup.bank3, 3);
     };
 
     auto reset_pmu = [&]() -> void

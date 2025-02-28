@@ -34,6 +34,44 @@ class MachineInterface;
 }
 
 // ---------------------------------------------------------------------------
+// emu::MachineSetup
+// ---------------------------------------------------------------------------
+
+namespace emu {
+
+struct MachineSetup
+{
+    std::string bank0 = core::Globals::bank0;
+    std::string bank1 = core::Globals::bank1;
+    std::string bank2 = core::Globals::bank2;
+    std::string bank3 = core::Globals::bank3;
+};
+
+}
+
+// ---------------------------------------------------------------------------
+// emu::MachineState
+// ---------------------------------------------------------------------------
+
+namespace emu {
+
+struct MachineState
+{
+    uint32_t cpu_clock = 7372800; /* cpu clock (RC2014) */
+    uint32_t cpu_ticks = 0;       /* cpu ticks          */
+    uint32_t vdu_clock = 4134375; /* vdu clock (NTSC)   */
+    uint32_t vdu_ticks = 0;       /* vdu ticks          */
+    uint32_t max_clock = 0;       /* max clock          */
+    uint32_t hlt_req   = 0;       /* halt request       */
+    uint8_t  ichar     = 0;       /* last input char    */
+    uint8_t  ochar     = 0;       /* last output char   */
+    bool     ready     = false;   /* a frame is ready   */
+    bool     stopped   = false;   /* emulation stopped  */
+};
+
+}
+
+// ---------------------------------------------------------------------------
 // emu::MachineInstance
 // ---------------------------------------------------------------------------
 
@@ -89,26 +127,12 @@ private: // private vdu interface
 
     virtual auto vdu_sync_vs(vdu::Instance&, bool vsync) -> void override final;
 
-private: // private types
-    struct State
-    {
-        uint32_t cpu_clock = 7372800; /* cpu clock (RC2014) */
-        uint32_t cpu_ticks = 0;       /* cpu ticks          */
-        uint32_t vdu_clock = 4134375; /* vdu clock (NTSC)   */
-        uint32_t vdu_ticks = 0;       /* vdu ticks          */
-        uint32_t max_clock = 0;       /* max clock          */
-        uint32_t hlt_req   = 0;       /* halt request       */
-        uint8_t  ichar     = 0;       /* last input char    */
-        uint8_t  ochar     = 0;       /* last output char   */
-        bool     ready     = false;   /* a frame is ready   */
-        bool     stopped   = false;   /* emulation stopped  */
-    };
-
 private: // private data
     MachineInterface& _interface;
+    MachineSetup      _setup;
+    MachineState      _state;
     FILE*             _istream;
     FILE*             _ostream;
-    State             _state;
     cpu::Instance     _cpu;
     mmu::Instance     _mmu;
     pmu::Instance     _pmu;

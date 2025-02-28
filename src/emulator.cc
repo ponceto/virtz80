@@ -59,14 +59,15 @@ auto Emulator::loop() -> void
     _prev_time = _curr_time;
     _curr_time = ClockType::now();
     _next_time = _next_time + _duration;
+
     if(_turbo != false) {
         _next_time = _curr_time;
     }
     else if(_curr_time < _next_time) {
         std::this_thread::sleep_until(_next_time);
-        _curr_time = _next_time;
     }
-    _vm.clock();
+
+    return _vm.clock();
 }
 
 auto Emulator::quit() -> void
