@@ -37,14 +37,6 @@
 #include "emulator.h"
 
 // ---------------------------------------------------------------------------
-// some clock/time type aliases
-// ---------------------------------------------------------------------------
-
-using clock_type      = std::chrono::steady_clock;
-using duration_type   = clock_type::duration;
-using time_point_type = clock_type::time_point;
-
-// ---------------------------------------------------------------------------
 // core::Emulator
 // ---------------------------------------------------------------------------
 
@@ -53,38 +45,35 @@ namespace core {
 Emulator::Emulator()
     : base::Application("virtz80")
     , _vm(*this)
-    , _ptime(clock_type::now())
-    , _ctime(clock_type::now())
-    , _dtime(0.0f)
+    , _duration(std::chrono::microseconds(16667))
+    , _prev_time(ClockType::now())
+    , _curr_time(ClockType::now())
+    , _next_time(ClockType::now())
+    , _turbo(Globals::turbo)
 {
     _vm.reset();
 }
 
-auto Emulator::main() -> void
+auto Emulator::loop() -> void
 {
-    auto loop = [&]() -> void
-    {
-        _ptime = _ctime;
-        _ctime = clock_type::now();
-        _dtime = std::chrono::duration<float>(_ctime - _ptime).count();
-        _vm.clock();
-    };
-
-#ifdef __EMSCRIPTEN__
-    if(_quit == false) {
-        loop();
+    _prev_time = _curr_time;
+    _curr_time = ClockType::now();
+    _next_time = _next_time + _duration;
+    if(_turbo != false) {
+        _next_time = _curr_time;
     }
-#else
-    while(_quit == false) {
-        loop();
+    else if(_curr_time < _next_time) {
+        std::this_thread::sleep_until(_next_time);
+        _curr_time = _next_time;
     }
-#endif
+    _vm.clock();
 }
 
 auto Emulator::quit() -> void
 {
     if(_quit == false) {
         _quit = true;
+        _vm.stop();
     }
 }
 

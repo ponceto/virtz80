@@ -64,7 +64,7 @@ auto MachineInstance::reset() -> void
         _state.cpu_ticks &= 0;
         _state.vdu_clock |= 0;
         _state.vdu_ticks &= 0;
-        _state.max_clock |= 0;
+        _state.max_clock &= 0;
         _state.hlt_req   &= 0;
         _state.ichar     &= 0;
         _state.ochar     &= 0;
@@ -131,6 +131,14 @@ auto MachineInstance::clock() -> void
                 _vdu.clock();
             }
         } while((_state.ready |= _state.stopped) == false);
+    }
+}
+
+auto MachineInstance::stop() -> void
+{
+    if(_state.stopped == false) {
+        _state.stopped = true;
+        _interface.quit();
     }
 }
 
@@ -204,8 +212,7 @@ auto MachineInstance::pmu_ctrl_wr(pmu::Instance& pmu, uint8_t data) -> uint8_t
 {
     if(data == 0x00) {
         if(++_state.hlt_req >= 2) {
-            _state.stopped = true;
-            _interface.quit();
+            stop();
         }
     }
     return data;

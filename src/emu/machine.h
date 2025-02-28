@@ -58,6 +58,8 @@ public: // public interface
 
     auto clock() -> void;
 
+    auto stop() -> void;
+
 private: // private interface
     auto rd_char(int character = '\0') -> uint8_t;
 
@@ -90,16 +92,16 @@ private: // private vdu interface
 private: // private types
     struct State
     {
-        uint32_t cpu_clock = 4000000; /* cpu clock         */
-        uint32_t cpu_ticks = 0;       /* cpu ticks         */
-        uint32_t vdu_clock = 4134375; /* vdu clock         */
-        uint32_t vdu_ticks = 0;       /* vdu ticks         */
-        uint32_t max_clock = 0;       /* max clock         */
-        uint32_t hlt_req   = 0;       /* halt request      */
-        uint8_t  ichar     = 0;       /* last input char   */
-        uint8_t  ochar     = 0;       /* last output char  */
-        bool     ready     = false;   /* a frame is ready  */
-        bool     stopped   = false;   /* emulation stopped */
+        uint32_t cpu_clock = 7372800; /* cpu clock (RC2014) */
+        uint32_t cpu_ticks = 0;       /* cpu ticks          */
+        uint32_t vdu_clock = 4134375; /* vdu clock (NTSC)   */
+        uint32_t vdu_ticks = 0;       /* vdu ticks          */
+        uint32_t max_clock = 0;       /* max clock          */
+        uint32_t hlt_req   = 0;       /* halt request       */
+        uint8_t  ichar     = 0;       /* last input char    */
+        uint8_t  ochar     = 0;       /* last output char   */
+        bool     ready     = false;   /* a frame is ready   */
+        bool     stopped   = false;   /* emulation stopped  */
     };
 
 private: // private data

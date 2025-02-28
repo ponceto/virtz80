@@ -41,6 +41,7 @@
 
 namespace core {
 
+bool        Globals::turbo = false;
 std::string Globals::bank0("assets/bank0.rom");
 std::string Globals::bank1("assets/bank1.rom");
 std::string Globals::bank2("assets/bank2.rom");

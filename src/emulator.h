@@ -51,20 +51,22 @@ public: // public interface
 
     virtual ~Emulator() = default;
 
-    virtual auto main() -> void override final;
+    virtual auto loop() -> void override final;
 
     virtual auto quit() -> void override final;
 
 private: // private data
-    using clock_type      = std::chrono::steady_clock;
-    using duration_type   = clock_type::duration;
-    using time_point_type = clock_type::time_point;
+    using ClockType     = std::chrono::steady_clock;
+    using DurationType  = ClockType::duration;
+    using TimePointType = ClockType::time_point;
 
 private: // private data
-    VirtualMachine  _vm;
-    time_point_type _ptime;
-    time_point_type _ctime;
-    float           _dtime;
+    VirtualMachine _vm;
+    DurationType   _duration;
+    TimePointType  _prev_time;
+    TimePointType  _curr_time;
+    TimePointType  _next_time;
+    bool           _turbo;
 };
 
 }

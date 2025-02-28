@@ -34,7 +34,7 @@ public: // public interface
 
     virtual ~Application() = default;
 
-    virtual auto main() -> void = 0;
+    virtual auto loop() -> void = 0;
 
     virtual auto quit() -> void = 0;
 

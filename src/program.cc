@@ -80,6 +80,14 @@ auto arg_val(const std::string& argument) -> std::string
     return val;
 }
 
+auto yes_or_no(const bool boolean) -> std::string
+{
+    if(boolean != false) {
+        return "yes";
+    }
+    return "no";
+}
+
 }
 
 // ---------------------------------------------------------------------------
@@ -105,6 +113,9 @@ auto Program::init(const ArgList& args) -> bool
             }
             else if(arg == "--help") {
                 return false;
+            }
+            else if(arg == "--turbo") {
+                Globals::turbo = true;
             }
             else if(arg_is(arg, "--bank0")) {
                 Globals::bank0 = arg_val(arg);
@@ -141,7 +152,7 @@ auto Program::main(const ArgList& args) -> void
     auto em_main_loop = +[](Emulator* emulator) -> void
     {
         if(emulator->running()) {
-            emulator->main();
+            emulator->loop();
         }
         else {
             emulator = (delete emulator, nullptr);
@@ -156,17 +167,22 @@ auto Program::main(const ArgList& args) -> void
 #ifdef __EMSCRIPTEN__
         ::emscripten_set_main_loop_arg(reinterpret_cast<em_arg_callback_func>(em_main_loop), emulator.release(), 0, 1);
 #else
-        emulator->main();
+        while(emulator->running()) {
+            emulator->loop();
+        }
 #endif
     };
 
     auto do_main = [&](std::ostream& stream) -> void
     {
-        stream << "bank0" << " ... " << Globals::bank0 << std::endl;
-        stream << "bank1" << " ... " << Globals::bank1 << std::endl;
-        stream << "bank2" << " ... " << Globals::bank2 << std::endl;
-        stream << "bank3" << " ... " << Globals::bank3 << std::endl;
-        stream << ""                                   << std::endl;
+        stream << "Z80 Virtual Machine"                               << std::endl;
+        stream << ""                                                  << std::endl;
+        stream << "  - turbo" << " ... " << yes_or_no(Globals::turbo) << std::endl;
+        stream << "  - bank0" << " ... " << Globals::bank0            << std::endl;
+        stream << "  - bank1" << " ... " << Globals::bank1            << std::endl;
+        stream << "  - bank2" << " ... " << Globals::bank2            << std::endl;
+        stream << "  - bank3" << " ... " << Globals::bank3            << std::endl;
+        stream << ""                                                  << std::endl;
 
         return main_loop();
     };
@@ -184,17 +200,11 @@ auto Program::help(const ArgList& args) -> void
         stream << ""                                                                 << std::endl;
         stream << "  -h, --help                    display this help and exit"       << std::endl;
         stream << ""                                                                 << std::endl;
+        stream << "  --turbo                       run the emulation at full speed"  << std::endl;
         stream << "  --bank0={filename}            specifies the ram bank #0 (16kB)" << std::endl;
         stream << "  --bank1={filename}            specifies the ram bank #1 (16kB)" << std::endl;
         stream << "  --bank2={filename}            specifies the ram bank #2 (16kB)" << std::endl;
         stream << "  --bank3={filename}            specifies the ram bank #3 (16kB)" << std::endl;
-        stream << ""                                                                 << std::endl;
-        stream << "Values:"                                                          << std::endl;
-        stream << ""                                                                 << std::endl;
-        stream << "  Bank #0: " << Globals::bank0                                    << std::endl;
-        stream << "  Bank #1: " << Globals::bank1                                    << std::endl;
-        stream << "  Bank #2: " << Globals::bank2                                    << std::endl;
-        stream << "  Bank #3: " << Globals::bank3                                    << std::endl;
         stream << ""                                                                 << std::endl;
     };
 

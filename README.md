@@ -16,6 +16,8 @@ The Z80 emulation core supports all documented and undocumented instructions and
 
 This project comes with a simple virtual machine « compatible » with the one provided by the [MAME project](https://github.com/mamedev/mame/tree/master/src/zexall).
 
+By default, the virtual machine loads and runs the `zexall` test suite available in the `assets` folder.
+
 Specifications:
 
 ```
@@ -27,7 +29,10 @@ VDU: 1 x Virtual VDU (Video Display Unit)
 I/O: 1 x Virtual Serial Output (memory mapped)
 ```
 
-By default, the virtual machine loads and runs the `zexall` test suite available in the `assets` folder.
+Notes:
+
+  - The CPU is clocked at `7.372800Mhz`, just like a standard [RC2014](https://rc2014.co.uk/) board.
+  - The VDU is clocked at `4.134375Mhz`, simulating a virtual NTSC display at 60Hz.
 
 ## HOW TO BUILD
 
@@ -102,17 +107,11 @@ Options:
 
   -h, --help                    display this help and exit
 
+  --turbo                       run the emulation at full speed
   --bank0={filename}            specifies the ram bank #0 (16kB)
   --bank1={filename}            specifies the ram bank #1 (16kB)
   --bank2={filename}            specifies the ram bank #2 (16kB)
   --bank3={filename}            specifies the ram bank #3 (16kB)
-
-Values:
-
-  Bank #0: assets/bank0.rom
-  Bank #1: assets/bank1.rom
-  Bank #2: assets/bank2.rom
-  Bank #3: assets/bank3.rom
 
 ```
 
@@ -121,12 +120,20 @@ Values:
 Run the virtual machine:
 
 ```
-./virtz80.bin
+./virtz80.bin --turbo
 ```
 
 Expected result:
 
 ```
+Z80 Virtual Machine
+
+  - turbo ... yes
+  - bank0 ... assets/bank0.rom
+  - bank1 ... assets/bank1.rom
+  - bank2 ... assets/bank2.rom
+  - bank3 ... assets/bank3.rom
+
 Z80 instruction exerciser
 <adc,sbc> hl,<bc,de,hl,sp>....  OK
 add hl,<bc,de,hl,sp>..........  OK
