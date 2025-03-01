@@ -114,6 +114,12 @@ auto Program::init(const ArgList& args) -> bool
             else if(arg == "--help") {
                 return false;
             }
+            else if(arg == "--zexall") {
+                Globals::bank0 = "assets/zexall.rom";
+            }
+            else if(arg == "--basic") {
+                Globals::bank0 = "assets/basic.rom";
+            }
             else if(arg == "--turbo") {
                 Globals::turbo = true;
             }
@@ -194,18 +200,21 @@ auto Program::help(const ArgList& args) -> void
 {
     auto do_help = [&](std::ostream& stream) -> void
     {
-        stream << "Usage: " << program_name(args) << " [OPTIONS...]"                 << std::endl;
-        stream << ""                                                                 << std::endl;
-        stream << "Options:"                                                         << std::endl;
-        stream << ""                                                                 << std::endl;
-        stream << "  -h, --help                    display this help and exit"       << std::endl;
-        stream << ""                                                                 << std::endl;
-        stream << "  --turbo                       run the emulation at full speed"  << std::endl;
-        stream << "  --bank0={filename}            specifies the ram bank #0 (16kB)" << std::endl;
-        stream << "  --bank1={filename}            specifies the ram bank #1 (16kB)" << std::endl;
-        stream << "  --bank2={filename}            specifies the ram bank #2 (16kB)" << std::endl;
-        stream << "  --bank3={filename}            specifies the ram bank #3 (16kB)" << std::endl;
-        stream << ""                                                                 << std::endl;
+        stream << "Usage: " << program_name(args) << " [OPTIONS...]"                   << std::endl;
+        stream << ""                                                                   << std::endl;
+        stream << "Options:"                                                           << std::endl;
+        stream << ""                                                                   << std::endl;
+        stream << "  -h, --help                    display this help and exit"         << std::endl;
+        stream << ""                                                                   << std::endl;
+        stream << "  --zexall                      run the Zexall test suite"          << std::endl;
+        stream << "  --basic                       run the Microsoft BASIC"            << std::endl;
+        stream << "  --turbo                       run the emulation at maximum speed" << std::endl;
+        stream << ""                                                                   << std::endl;
+        stream << "  --bank0={filename}            specifies the ram bank #0 (16kB)"   << std::endl;
+        stream << "  --bank1={filename}            specifies the ram bank #1 (16kB)"   << std::endl;
+        stream << "  --bank2={filename}            specifies the ram bank #2 (16kB)"   << std::endl;
+        stream << "  --bank3={filename}            specifies the ram bank #3 (16kB)"   << std::endl;
+        stream << ""                                                                   << std::endl;
     };
 
     return do_help(std::cout);

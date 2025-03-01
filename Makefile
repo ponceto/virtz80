@@ -73,8 +73,8 @@ virtz80_SOURCES = \
 	src/emu/machine.cc \
 	src/emu/cpu/cpu-core.cc \
 	src/emu/mmu/mmu-core.cc \
-	src/emu/pmu/pmu-core.cc \
 	src/emu/vdu/vdu-core.cc \
+	src/emu/sio/sio-core.cc \
 	$(NULL)
 
 virtz80_HEADERS = \
@@ -86,8 +86,8 @@ virtz80_HEADERS = \
 	src/emu/machine.h \
 	src/emu/cpu/cpu-core.h \
 	src/emu/mmu/mmu-core.h \
-	src/emu/pmu/pmu-core.h \
 	src/emu/vdu/vdu-core.h \
+	src/emu/sio/sio-core.h \
 	$(NULL)
 
 virtz80_OBJECTS = \
@@ -99,8 +99,8 @@ virtz80_OBJECTS = \
 	src/emu/machine.o \
 	src/emu/cpu/cpu-core.o \
 	src/emu/mmu/mmu-core.o \
-	src/emu/pmu/pmu-core.o \
 	src/emu/vdu/vdu-core.o \
+	src/emu/sio/sio-core.o \
 	$(NULL)
 
 virtz80_LDFLAGS = \

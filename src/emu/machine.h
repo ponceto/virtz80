@@ -19,8 +19,8 @@
 
 #include "cpu/cpu-core.h"
 #include "mmu/mmu-core.h"
-#include "pmu/pmu-core.h"
 #include "vdu/vdu-core.h"
+#include "sio/sio-core.h"
 
 // ---------------------------------------------------------------------------
 // forward declarations
@@ -61,10 +61,10 @@ struct MachineState
     uint32_t cpu_ticks = 0;       /* cpu ticks          */
     uint32_t vdu_clock = 4134375; /* vdu clock (NTSC)   */
     uint32_t vdu_ticks = 0;       /* vdu ticks          */
+    uint32_t sio_clock = 115200;  /* sio clock (SIO)    */
+    uint32_t sio_ticks = 0;       /* sio ticks          */
     uint32_t max_clock = 0;       /* max clock          */
     uint32_t hlt_req   = 0;       /* halt request       */
-    uint8_t  ichar     = 0;       /* last input char    */
-    uint8_t  ochar     = 0;       /* last output char   */
     bool     ready     = false;   /* a frame is ready   */
     bool     stopped   = false;   /* emulation stopped  */
 };
@@ -80,8 +80,8 @@ namespace emu {
 class MachineInstance final
     : private cpu::Interface
     , private mmu::Interface
-    , private pmu::Interface
     , private vdu::Interface
+    , private sio::Interface
 {
 public: // public interface
     MachineInstance(MachineInterface&);
@@ -97,11 +97,6 @@ public: // public interface
     auto clock() -> void;
 
     auto stop() -> void;
-
-private: // private interface
-    auto rd_char(int character = '\0') -> uint8_t;
-
-    auto wr_char(int character = '\0') -> uint8_t;
 
 private: // private cpu interface
     virtual auto cpu_mreq_m1(cpu::Instance&, uint16_t addr, uint8_t data) -> uint8_t override final;
@@ -119,24 +114,22 @@ private: // private cpu interface
 private: // private mmu interface
     virtual auto mmu_char_wr(mmu::Instance&, uint8_t data) -> uint8_t override final;
 
-private: // private pmu interface
-    virtual auto pmu_ctrl_wr(pmu::Instance&, uint8_t data) -> uint8_t override final;
-
 private: // private vdu interface
     virtual auto vdu_sync_hs(vdu::Instance&, bool hsync) -> void override final;
 
     virtual auto vdu_sync_vs(vdu::Instance&, bool vsync) -> void override final;
 
+private: // private sio interface
+    virtual auto sio_intr_rq(sio::Instance&) -> void override final;
+
 private: // private data
     MachineInterface& _interface;
     MachineSetup      _setup;
     MachineState      _state;
-    FILE*             _istream;
-    FILE*             _ostream;
     cpu::Instance     _cpu;
     mmu::Instance     _mmu;
-    pmu::Instance     _pmu;
     vdu::Instance     _vdu;
+    sio::Instance     _sio;
 };
 
 }

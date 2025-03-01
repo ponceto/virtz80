@@ -14,9 +14,13 @@ The Z80 emulation core supports all documented and undocumented instructions and
 
 ## THE VIRTUAL MACHINE
 
-This project comes with a simple virtual machine « compatible » with the one provided by the [MAME project](https://github.com/mamedev/mame/tree/master/src/zexall).
+This project comes with a simple virtual machine to play with the Z80 emulation core.
 
-By default, the virtual machine loads and runs the `zexall` test suite available in the `assets` folder.
+This virtual machine is quite « compatible » with:
+
+  - the one provided by the [MAME project](https://github.com/mamedev/mame/tree/master/src/zexall) for zexall testing purpose.
+  - the [Grant Searle Z80 computer](http://searle.x10host.com/z80/SimpleZ80.html), a fully operational Z80 computer running Microsoft BASIC.
+  - the [RC2014](https://rc2014.co.uk/) simple 8 bit Z80 based modular computer, originally built to run Microsoft BASIC.
 
 Specifications:
 
@@ -24,15 +28,17 @@ Specifications:
 CPU: 1 x Z80 CPU
 RAM: 4 x 16kB
 MMU: 1 x Virtual MMU (Memory Management Unit)
-PMU: 1 x Virtual PMU (Peripheral Management Unit)
 VDU: 1 x Virtual VDU (Video Display Unit)
-I/O: 1 x Virtual Serial Output (memory mapped)
+SIO: 1 x Virtual SIO (Serial Input/Output)
 ```
 
 Notes:
 
-  - The CPU is clocked at `7.372800Mhz`, just like a standard [RC2014](https://rc2014.co.uk/) board.
-  - The VDU is clocked at `4.134375Mhz`, simulating a virtual NTSC display at 60Hz.
+  - The `CPU` is clocked at `7.372800Mhz`, just like a standard [RC2014](https://rc2014.co.uk/) board.
+  - The `VDU` is clocked at `4.134375Mhz`, emulating a virtual 60Hz display (only used for real-time synchronization purpose).
+  - The `SIO` is clocked at `115.200KHz`, emulating a MC6850 ACIA (Asynchronous Communications Interface Adapter) serial I/O.
+
+By default, the virtual machine loads and runs the `zexall` test suite available in the `assets` folder, but you can also run the Microsoft BASIC.
 
 ## HOW TO BUILD
 
@@ -94,7 +100,7 @@ make -f Makefile.wasm clean
 
 ## HOW TO RUN
 
-The project comes with a simple virtual machine which is able to run the `zexall` test suite.
+The project comes with a simple virtual machine which is able to run the `zexall` test suite and the Microsoft BASIC.
 
 ### Usage
 
@@ -107,7 +113,10 @@ Options:
 
   -h, --help                    display this help and exit
 
-  --turbo                       run the emulation at full speed
+  --zexall                      run the Zexall test suite
+  --basic                       run the Microsoft BASIC
+  --turbo                       run the emulation at maximum speed
+
   --bank0={filename}            specifies the ram bank #0 (16kB)
   --bank1={filename}            specifies the ram bank #1 (16kB)
   --bank2={filename}            specifies the ram bank #2 (16kB)
@@ -117,10 +126,18 @@ Options:
 
 ### Run
 
-Run the virtual machine:
+Run the virtual machine with or without the `--zexall` option.
+
+It is recommended to pass the `--turbo` option, because the Zexall test run for a very long time.
 
 ```
 ./virtz80.bin --turbo
+```
+
+or
+
+```
+./virtz80.bin --zexall --turbo
 ```
 
 Expected result:
@@ -129,7 +146,7 @@ Expected result:
 Z80 Virtual Machine
 
   - turbo ... yes
-  - bank0 ... assets/bank0.rom
+  - bank0 ... assets/zexall.rom
   - bank1 ... assets/bank1.rom
   - bank2 ... assets/bank2.rom
   - bank3 ... assets/bank3.rom
@@ -203,6 +220,27 @@ ld (<ix,iy>+1),<h,l>..........  OK
 ld (<ix,iy>+1),a..............  OK
 ld (<bc,de>),a................  OK
 Tests complete
+```
+
+### Run Microsoft BASIC
+
+Run the virtual machine with the `--basic` option.
+
+```
+./virtz80.bin --basic
+```
+
+Expected result:
+
+```
+Z80 SBC By Grant Searle
+
+Memory top? 
+
+Z80 BASIC Ver 4.7b
+Copyright (C) 1978 by Microsoft
+32382 Bytes free
+Ok
 ```
 
 ### Run the WASM version

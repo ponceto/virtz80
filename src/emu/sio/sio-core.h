@@ -1,5 +1,5 @@
 /*
- * pmu-core.h - Copyright (c) 2001-2025 - Olivier Poncet
+ * sio-core.h - Copyright (c) 2001-2025 - Olivier Poncet
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __EMU_PMU_CORE_H__
-#define __EMU_PMU_CORE_H__
+#ifndef __EMU_SIO_CORE_H__
+#define __EMU_SIO_CORE_H__
 
 // ---------------------------------------------------------------------------
 // forward declarations
 // ---------------------------------------------------------------------------
 
-namespace pmu {
+namespace sio {
 
 class Instance;
 class Interface;
@@ -29,23 +29,29 @@ class Interface;
 }
 
 // ---------------------------------------------------------------------------
-// pmu::State
+// sio::State
 // ---------------------------------------------------------------------------
 
-namespace pmu {
+namespace sio {
 
 struct State
 {
-    uint32_t reserved;
+    int     rx      = -1; /* input file descriptor  */
+    int     tx      = -1; /* output file descriptor */
+    uint8_t status  =  0; /* status register        */
+    uint8_t control =  0; /* control register       */
+    uint8_t rx_data =  0; /* receive data register  */
+    uint8_t tx_data =  0; /* transmit data register */
+    uint8_t enabled =  0; /* is enabled             */
 };
 
 }
 
 // ---------------------------------------------------------------------------
-// pmu::Instance
+// sio::Instance
 // ---------------------------------------------------------------------------
 
-namespace pmu {
+namespace sio {
 
 class Instance
 {
@@ -62,9 +68,15 @@ public: // public interface
 
     auto clock() -> void;
 
-    auto rd_byte(uint16_t port, uint8_t data) -> uint8_t;
+    auto rd_acia_stat(uint8_t data) -> uint8_t;
 
-    auto wr_byte(uint16_t port, uint8_t data) -> uint8_t;
+    auto wr_acia_ctrl(uint8_t data) -> uint8_t;
+
+    auto rd_acia_data(uint8_t data) -> uint8_t;
+
+    auto wr_acia_data(uint8_t data) -> uint8_t;
+
+    auto print(uint8_t data) -> uint8_t;
 
     auto operator->() -> State*
     {
@@ -79,10 +91,10 @@ protected: // protected data
 }
 
 // ---------------------------------------------------------------------------
-// pmu::Interface
+// sio::Interface
 // ---------------------------------------------------------------------------
 
-namespace pmu {
+namespace sio {
 
 class Interface
 {
@@ -95,7 +107,7 @@ public: // public interface
 
     virtual ~Interface() = default;
 
-    virtual auto pmu_ctrl_wr(Instance&, uint8_t data) -> uint8_t = 0;
+    virtual auto sio_intr_rq(Instance&) -> void = 0;
 };
 
 }
@@ -104,4 +116,4 @@ public: // public interface
 // End-Of-File
 // ---------------------------------------------------------------------------
 
-#endif /* __EMU_PMU_CORE_H__ */
+#endif /* __EMU_SIO_CORE_H__ */

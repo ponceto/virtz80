@@ -41,20 +41,16 @@ MachineInstance::MachineInstance(MachineInterface& interface)
     : _interface(interface)
     , _setup()
     , _state()
-    , _istream(stdin)
-    , _ostream(stdout)
     , _cpu(*this)
     , _mmu(*this)
-    , _pmu(*this)
     , _vdu(*this)
+    , _sio(*this)
 {
 }
 
 MachineInstance::~MachineInstance()
 {
-    if((_state.ochar != '\0') && (_state.ochar != '\n')) {
-        static_cast<void>(wr_char('\n'));
-    }
+    _sio.print('\n');
 }
 
 auto MachineInstance::reset() -> void
@@ -65,10 +61,10 @@ auto MachineInstance::reset() -> void
         _state.cpu_ticks &= 0;
         _state.vdu_clock |= 0;
         _state.vdu_ticks &= 0;
+        _state.sio_clock |= 0;
+        _state.sio_ticks &= 0;
         _state.max_clock &= 0;
         _state.hlt_req   &= 0;
-        _state.ichar     &= 0;
-        _state.ochar     &= 0;
         _state.ready     &= false;
         _state.stopped   &= false;
 
@@ -77,6 +73,9 @@ auto MachineInstance::reset() -> void
         }
         if(_state.vdu_clock >= _state.max_clock) {
             _state.max_clock = _state.vdu_clock;
+        }
+        if(_state.sio_clock >= _state.max_clock) {
+            _state.max_clock = _state.sio_clock;
         }
     };
 
@@ -94,14 +93,14 @@ auto MachineInstance::reset() -> void
         _mmu.load_bank(_setup.bank3, 3);
     };
 
-    auto reset_pmu = [&]() -> void
-    {
-        _pmu.reset();
-    };
-
     auto reset_vdu = [&]() -> void
     {
         _vdu.reset();
+    };
+
+    auto reset_sio = [&]() -> void
+    {
+        _sio.reset();
     };
 
     auto reset_all = [&]() -> void
@@ -109,8 +108,8 @@ auto MachineInstance::reset() -> void
         reset_state();
         reset_cpu();
         reset_mmu();
-        reset_pmu();
         reset_vdu();
+        reset_sio();
     };
 
     return reset_all();
@@ -121,6 +120,7 @@ auto MachineInstance::clock() -> void
     if((_state.ready = _state.stopped) == false) {
         const uint32_t cpu_clock = _state.cpu_clock;
         const uint32_t vdu_clock = _state.vdu_clock;
+        const uint32_t sio_clock = _state.sio_clock;
         const uint32_t max_clock = _state.max_clock;
         do {
             if((_state.cpu_ticks += cpu_clock) >= max_clock) {
@@ -130,6 +130,10 @@ auto MachineInstance::clock() -> void
             if((_state.vdu_ticks += vdu_clock) >= max_clock) {
                 _state.vdu_ticks -= max_clock;
                 _vdu.clock();
+            }
+            if((_state.sio_ticks += sio_clock) >= max_clock) {
+                _state.sio_ticks -= max_clock;
+                _sio.clock();
             }
         } while((_state.ready |= _state.stopped) == false);
     }
@@ -141,35 +145,6 @@ auto MachineInstance::stop() -> void
         _state.stopped = true;
         _interface.quit();
     }
-}
-
-auto MachineInstance::rd_char(int character) -> uint8_t
-{
-    if((character = ::fgetc(_istream)) != EOF) {
-    //  static_cast<void>(::fflush(_istream));
-        _state.ichar = character;
-    }
-    else {
-        _state.ichar = '\0';
-    }
-    return _state.ichar;
-}
-
-auto MachineInstance::wr_char(int character) -> uint8_t
-{
-#ifdef __EMSCRIPTEN__
-    if(character == '\r') {
-        return character;
-    }
-#endif
-    if((character = ::fputc(character, _ostream)) != EOF) {
-        static_cast<void>(::fflush(_ostream));
-        _state.ochar = character;
-    }
-    else {
-        _state.ochar = '\0';
-    }
-    return _state.ochar;
 }
 
 auto MachineInstance::cpu_mreq_m1(cpu::Instance& cpu, uint16_t addr, uint8_t data) -> uint8_t
@@ -189,34 +164,48 @@ auto MachineInstance::cpu_mreq_wr(cpu::Instance& cpu, uint16_t addr, uint8_t dat
 
 auto MachineInstance::cpu_iorq_m1(cpu::Instance& cpu, uint16_t port, uint8_t data) -> uint8_t
 {
-    return _pmu.rd_byte(port, data);
+    return 0x00;
 }
 
 auto MachineInstance::cpu_iorq_rd(cpu::Instance& cpu, uint16_t port, uint8_t data) -> uint8_t
 {
-    return _pmu.rd_byte(port, data);
+    if(port == 0x0001) {
+        data = 0xff;
+    }
+    if((port & 0x0080) != 0) {
+        if((port & 0x0001) != 0) {
+            data = _sio.rd_acia_data(data);
+        }
+        else {
+            data = _sio.rd_acia_stat(data);
+        }
+    }
+    return data;
 }
 
 auto MachineInstance::cpu_iorq_wr(cpu::Instance& cpu, uint16_t port, uint8_t data) -> uint8_t
 {
-    return _pmu.wr_byte(port, data);
+    if(port == 0x0001) {
+        if(data == 0x00) {
+            if(++_state.hlt_req >= 2) {
+                stop();
+            }
+        }
+    }
+    if((port & 0x0080) != 0) {
+        if((port & 0x0001) != 0) {
+            data = _sio.wr_acia_data(data);
+        }
+        else {
+            data = _sio.wr_acia_ctrl(data);
+        }
+    }
+    return data;
 }
 
 auto MachineInstance::mmu_char_wr(mmu::Instance& mmu, uint8_t data) -> uint8_t
 {
-    static_cast<void>(wr_char(data));
-
-    return data;
-}
-
-auto MachineInstance::pmu_ctrl_wr(pmu::Instance& pmu, uint8_t data) -> uint8_t
-{
-    if(data == 0x00) {
-        if(++_state.hlt_req >= 2) {
-            stop();
-        }
-    }
-    return data;
+    return _sio.print(data);
 }
 
 auto MachineInstance::vdu_sync_hs(vdu::Instance& vdu, bool data) -> void
@@ -227,6 +216,11 @@ auto MachineInstance::vdu_sync_hs(vdu::Instance& vdu, bool data) -> void
 auto MachineInstance::vdu_sync_vs(vdu::Instance& vdu, bool data) -> void
 {
     _state.ready |= true;
+}
+
+auto MachineInstance::sio_intr_rq(sio::Instance& sio) -> void
+{
+    _cpu.pulse_int();
 }
 
 }

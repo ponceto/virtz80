@@ -42,10 +42,10 @@
 namespace core {
 
 bool        Globals::turbo = false;
-std::string Globals::bank0("assets/bank0.rom");
-std::string Globals::bank1("assets/bank1.rom");
-std::string Globals::bank2("assets/bank2.rom");
-std::string Globals::bank3("assets/bank3.rom");
+std::string Globals::bank0;
+std::string Globals::bank1;
+std::string Globals::bank2;
+std::string Globals::bank3;
 
 }
 
@@ -57,6 +57,18 @@ namespace core {
 
 auto Globals::init() -> void
 {
+    if(bank0.empty()) {
+        Globals::bank0 = "assets/zexall.rom";
+    }
+    if(bank1.empty()) {
+        Globals::bank1 = "assets/bank1.rom";
+    }
+    if(bank2.empty()) {
+        Globals::bank2 = "assets/bank2.rom";
+    }
+    if(bank3.empty()) {
+        Globals::bank3 = "assets/bank3.rom";
+    }
 }
 
 }
