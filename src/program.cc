@@ -31,6 +31,8 @@
 #include <vector>
 #include <iostream>
 #include <stdexcept>
+#include <unistd.h>
+#include <termios.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
@@ -223,6 +225,49 @@ auto Program::help(const ArgList& args) -> void
 }
 
 // ---------------------------------------------------------------------------
+// Terminal
+// ---------------------------------------------------------------------------
+
+namespace core {
+
+Terminal::Terminal()
+    : _attributes()
+{
+    get_attributes(0, _attributes[0]);
+    get_attributes(1, _attributes[1]);
+    get_attributes(2, _attributes[2]);
+}
+
+Terminal::~Terminal()
+{
+    set_attributes(0, _attributes[0]);
+    set_attributes(1, _attributes[1]);
+    set_attributes(2, _attributes[2]);
+}
+
+auto Terminal::get_attributes(int fd, termios_type& attributes) -> void
+{
+    if(::isatty(fd) != 0) {
+        const int rc = ::tcgetattr(fd, &attributes);
+        if(rc != 0) {
+            throw std::runtime_error("tcgetattr() has failed");
+        }
+    }
+}
+
+auto Terminal::set_attributes(int fd, termios_type& attributes) -> void
+{
+    if(::isatty(fd) != 0) {
+        const int rc = ::tcsetattr(fd, TCSANOW, &attributes);
+        if(rc != 0) {
+            throw std::runtime_error("tcsetattr() has failed");
+        }
+    }
+}
+
+}
+
+// ---------------------------------------------------------------------------
 // main
 // ---------------------------------------------------------------------------
 
@@ -234,6 +279,7 @@ int main(int argc, char* argv[])
     const ArgList args(argv, argv + argc);
 
     try {
+        const Terminal terminal;
         if(Program::init(args) != false) {
             Program::main(args);
         }

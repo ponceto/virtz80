@@ -45,6 +45,36 @@ struct Program
 }
 
 // ---------------------------------------------------------------------------
+// core::Terminal
+// ---------------------------------------------------------------------------
+
+namespace core {
+
+class Terminal
+{
+public: // public interface
+    Terminal();
+
+    Terminal(const Terminal&) = delete;
+
+    Terminal& operator=(const Terminal&) = delete;
+
+    virtual ~Terminal();
+
+private: // private interface
+    using termios_type = struct termios;
+
+    auto get_attributes(int fd, termios_type& attributes) -> void;
+
+    auto set_attributes(int fd, termios_type& attributes) -> void;
+
+private: // private data
+    termios_type _attributes[3];
+};
+
+}
+
+// ---------------------------------------------------------------------------
 // End-Of-File
 // ---------------------------------------------------------------------------
 

@@ -28,8 +28,8 @@
 #include <vector>
 #include <iostream>
 #include <stdexcept>
-#include <termios.h>
 #include <unistd.h>
+#include <termios.h>
 #include <poll.h>
 #include "sio-core.h"
 
@@ -37,9 +37,10 @@
 // sio::aliases
 // ---------------------------------------------------------------------------
 
-namespace {
+namespace sio {
 
 using pollfd_type  = struct pollfd;
+using termios_type = struct termios;
 
 }
 
@@ -51,21 +52,25 @@ namespace sio {
 
 struct Terminal
 {
-    using termios_type = struct termios;
-
     static auto get_attributes(int fd, termios_type& attributes) -> void
     {
-        if(::tcgetattr(fd, &attributes) != 0) {
-            throw std::runtime_error("tcgetattr() has failed");
+        if(::isatty(fd) != 0) {
+            const int rc = ::tcgetattr(fd, &attributes);
+            if(rc != 0) {
+                throw std::runtime_error("tcgetattr() has failed");
+            }
         }
-    };
+    }
 
     static auto set_attributes(int fd, termios_type& attributes) -> void
     {
-        if(::tcsetattr(fd, TCSANOW, &attributes) != 0) {
-            throw std::runtime_error("tcsetattr() has failed");
+        if(::isatty(fd) != 0) {
+            const int rc = ::tcsetattr(fd, TCSANOW, &attributes);
+            if(rc != 0) {
+                throw std::runtime_error("tcsetattr() has failed");
+            }
         }
-    };
+    }
 
     static auto adjust_iflags(termios_type& attributes) -> void
     {
@@ -73,7 +78,7 @@ struct Terminal
         attributes.c_iflag |=  INLCR;
         attributes.c_iflag &= ~IGNCR;
         attributes.c_iflag &= ~ICRNL;
-    };
+    }
 
     static auto adjust_oflags(termios_type& attributes) -> void
     {
@@ -82,7 +87,7 @@ struct Terminal
         attributes.c_oflag |=  ONOCR;
         attributes.c_oflag |=  OFILL;
         attributes.c_oflag |=  OFDEL;
-    };
+    }
 
     static auto adjust_lflags(termios_type& attributes) -> void
     {
@@ -91,7 +96,7 @@ struct Terminal
         attributes.c_lflag |=  ECHOE;
         attributes.c_lflag &= ~ICANON;
         attributes.c_lflag |=  ISIG;
-    };
+    }
 
     static auto setup_rx(int rx) -> void
     {
