@@ -100,7 +100,7 @@ make -f Makefile.wasm clean
 
 ## HOW TO RUN
 
-The project comes with a simple virtual machine which is able to run the `zexall` test suite and the Microsoft BASIC.
+The project comes with a simple virtual machine which is able to run the `zexall` and `zexdoc` test suites and the Microsoft BASIC.
 
 ### Usage
 
@@ -114,6 +114,7 @@ Options:
   -h, --help                    display this help and exit
 
   --zexall                      run the Zexall test suite
+  --zexdoc                      run the Zexdoc test suite
   --basic                       run the Microsoft BASIC
   --turbo                       run the emulation at maximum speed
 
@@ -124,11 +125,11 @@ Options:
 
 ```
 
-### Run
+### Run the Z80 instruction set exerciser
 
-Run the virtual machine with or without the `--zexall` option.
+Run the virtual machine with or without the `--zexall` or the `--zexdoc` option.
 
-It is recommended to pass the `--turbo` option, because the Zexall test run for a very long time.
+It is recommended to pass the `--turbo` option, because the Zexall and Zexdoc tests run for a very long time.
 
 ```
 ./virtz80.bin --turbo
@@ -138,6 +139,12 @@ or
 
 ```
 ./virtz80.bin --zexall --turbo
+```
+
+or
+
+```
+./virtz80.bin --zexdoc --turbo
 ```
 
 Expected result:

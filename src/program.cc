@@ -119,6 +119,9 @@ auto Program::init(const ArgList& args) -> bool
             else if(arg == "--zexall") {
                 Globals::bank0 = "assets/zexall.rom";
             }
+            else if(arg == "--zexdoc") {
+                Globals::bank0 = "assets/zexdoc.rom";
+            }
             else if(arg == "--basic") {
                 Globals::bank0 = "assets/basic.rom";
             }
@@ -209,6 +212,7 @@ auto Program::help(const ArgList& args) -> void
         stream << "  -h, --help                    display this help and exit"         << std::endl;
         stream << ""                                                                   << std::endl;
         stream << "  --zexall                      run the Zexall test suite"          << std::endl;
+        stream << "  --zexdoc                      run the Zexdoc test suite"          << std::endl;
         stream << "  --basic                       run the Microsoft BASIC"            << std::endl;
         stream << "  --turbo                       run the emulation at maximum speed" << std::endl;
         stream << ""                                                                   << std::endl;

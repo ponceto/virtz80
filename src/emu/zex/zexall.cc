@@ -1,10 +1,49 @@
+/*
+ * zexall.cc - Copyright (c) 2001-2025 - Olivier Poncet
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cstdint>
+#include <cstdarg>
+#include <memory>
+#include <string>
+#include <vector>
+#include <iostream>
+#include <stdexcept>
+
+// ---------------------------------------------------------------------------
+// some useful macros
+// ---------------------------------------------------------------------------
+
+#ifndef countof
+#define countof(array) (sizeof(array) / sizeof(array[0]))
+#endif
+
 // ---------------------------------------------------------------------------
 // CP/M bdos emulation - Copyright (c) 2009 - Kevin Horton
 // ---------------------------------------------------------------------------
 
-namespace {
+namespace zexall {
 
-const uint8_t cpmemu[16 * 16] =
+const uint8_t head[16 * 16] =
 {
     0xc3, 0x33, 0x00, 0x00, 0x00, 0x3e, 0x02, 0xb9, 0x20, 0x06, 0x7b, 0xcd, 0x20, 0x00, 0x18, 0x22,
     0x3e, 0x09, 0xb9, 0x20, 0x1d, 0x1a, 0xfe, 0x24, 0x28, 0x18, 0xcd, 0x20, 0x00, 0x13, 0x18, 0xf5,
@@ -30,9 +69,9 @@ const uint8_t cpmemu[16 * 16] =
 // Z80 instruction set exerciser - Copyright (c) 1994 - Frank D. Cringle
 // ---------------------------------------------------------------------------
 
-namespace {
+namespace zexall {
 
-const uint8_t zexall[16 * 1008] =
+const uint8_t body[16 * 1008] =
 {
     0xc3, 0x13, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x2a, 0x06, 0x00, 0xf9, 0x11, 0xda, 0x1d, 0x0e, 0x09, 0xcd, 0xce, 0x1d, 0x21,
@@ -1044,6 +1083,64 @@ const uint8_t zexall[16 * 1008] =
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
+}
+
+// ---------------------------------------------------------------------------
+// BankWriter
+// ---------------------------------------------------------------------------
+
+class BankWriter
+{
+public: // public interface
+    BankWriter(const std::string& filename)
+        : _filename(filename)
+        , _stream(::fopen(_filename.c_str(), "wb"))
+    {
+        if(_stream == nullptr) {
+            throw std::runtime_error("fopen() has failed");
+        }
+    }
+
+    virtual ~BankWriter()
+    {
+        if(_stream != nullptr) {
+            _stream = (::fclose(_stream), nullptr);
+        }
+    }
+
+    auto write(const uint8_t* buffer, const size_t length) -> void
+    {
+        const auto rc = ::fwrite(buffer, sizeof(*buffer), length, _stream);
+        if(rc != length) {
+            throw std::runtime_error("fwrite() has failed");
+        }
+    }
+
+private: // private data
+    const std::string _filename;
+    FILE*             _stream;
+};
+
+// ---------------------------------------------------------------------------
+// main
+// ---------------------------------------------------------------------------
+
+int main(int argc, char* argv[])
+{
+    try {
+        BankWriter bank("zexall.rom");
+        bank.write(zexall::head, countof(zexall::head));
+        bank.write(zexall::body, countof(zexall::body));
+    }
+    catch(const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+    catch(...) {
+        std::cerr << "error!" << std::endl;
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }
 
 // ---------------------------------------------------------------------------
