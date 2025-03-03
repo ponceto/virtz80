@@ -74,7 +74,6 @@ struct Terminal
 
     static auto adjust_iflags(termios_type& attributes) -> void
     {
-        attributes.c_iflag &= ~0;
         attributes.c_iflag |=  INLCR;
         attributes.c_iflag &= ~IGNCR;
         attributes.c_iflag &= ~ICRNL;
@@ -82,20 +81,18 @@ struct Terminal
 
     static auto adjust_oflags(termios_type& attributes) -> void
     {
-        attributes.c_oflag &= ~0;
-        attributes.c_oflag |=  OPOST;
         attributes.c_oflag |=  ONOCR;
-        attributes.c_oflag |=  OFILL;
-        attributes.c_oflag |=  OFDEL;
+        attributes.c_oflag &= ~OFILL;
     }
 
     static auto adjust_lflags(termios_type& attributes) -> void
     {
-        attributes.c_lflag &= ~0;
-        attributes.c_lflag &= ~ECHO;
-        attributes.c_lflag |=  ECHOE;
-        attributes.c_lflag &= ~ICANON;
         attributes.c_lflag |=  ISIG;
+        attributes.c_lflag &= ~ECHO;
+        attributes.c_lflag &= ~ECHOE;
+        attributes.c_lflag &= ~ECHOK;
+        attributes.c_lflag &= ~ECHONL;
+        attributes.c_lflag &= ~ICANON;
     }
 
     static auto setup_rx(int rx) -> void

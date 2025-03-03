@@ -64,12 +64,12 @@ public: // public interface
 private: // private interface
     using termios_type = struct termios;
 
-    auto get_attributes(int fd, termios_type& attributes) -> void;
+    static auto get_attributes(int fd, termios_type& attributes) -> void;
 
-    auto set_attributes(int fd, termios_type& attributes) -> void;
+    static auto set_attributes(int fd, termios_type& attributes) -> void;
 
 private: // private data
-    termios_type _attributes[3];
+    termios_type _termios[3];
 };
 
 }

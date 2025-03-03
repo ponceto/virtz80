@@ -231,18 +231,18 @@ auto Program::help(const ArgList& args) -> void
 namespace core {
 
 Terminal::Terminal()
-    : _attributes()
+    : _termios()
 {
-    get_attributes(0, _attributes[0]);
-    get_attributes(1, _attributes[1]);
-    get_attributes(2, _attributes[2]);
+    get_attributes(0, _termios[0]);
+    get_attributes(1, _termios[1]);
+    get_attributes(2, _termios[2]);
 }
 
 Terminal::~Terminal()
 {
-    set_attributes(0, _attributes[0]);
-    set_attributes(1, _attributes[1]);
-    set_attributes(2, _attributes[2]);
+    set_attributes(0, _termios[0]);
+    set_attributes(1, _termios[1]);
+    set_attributes(2, _termios[2]);
 }
 
 auto Terminal::get_attributes(int fd, termios_type& attributes) -> void
