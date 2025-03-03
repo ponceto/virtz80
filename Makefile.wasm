@@ -108,7 +108,7 @@ virtz80_OBJECTS = \
 	$(NULL)
 
 virtz80_LDFLAGS = \
-	--shell-file src/emsdk/shell.html \
+	--shell-file emsdk/shell.html \
 	--use-preload-plugins \
 	--preload-file assets/zexall.rom \
 	--preload-file assets/basic.rom \
