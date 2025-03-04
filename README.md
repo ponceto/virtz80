@@ -29,7 +29,7 @@ CPU: 1 x Z80 CPU
 RAM: 4 x 16kB
 MMU: 1 x Virtual MMU (Memory Management Unit)
 VDU: 1 x Virtual VDU (Video Display Unit)
-SIO: 1 x Virtual SIO (Serial Input/Output)
+SIO: 2 x Virtual SIO (Serial Input/Output)
 ```
 
 Notes:

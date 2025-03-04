@@ -61,12 +61,12 @@ struct MachineState
     uint32_t cpu_ticks = 0;       /* cpu ticks          */
     uint32_t vdu_clock = 4134375; /* vdu clock (NTSC)   */
     uint32_t vdu_ticks = 0;       /* vdu ticks          */
-    uint32_t sio_clock = 115200;  /* sio clock (SIO)    */
+    uint32_t sio_clock = 115200;  /* sio clock (ACIA)   */
     uint32_t sio_ticks = 0;       /* sio ticks          */
     uint32_t max_clock = 0;       /* max clock          */
-    uint32_t hlt_req   = 0;       /* halt request       */
-    bool     ready     = false;   /* a frame is ready   */
+    uint32_t hlt_count = 0;       /* halt request       */
     bool     stopped   = false;   /* emulation stopped  */
+    bool     ready     = false;   /* a frame is ready   */
 };
 
 }
@@ -129,7 +129,8 @@ private: // private data
     cpu::Instance     _cpu;
     mmu::Instance     _mmu;
     vdu::Instance     _vdu;
-    sio::Instance     _sio;
+    sio::Instance     _sio0;
+    sio::Instance     _sio1;
 };
 
 }

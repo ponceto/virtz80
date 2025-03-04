@@ -44,13 +44,15 @@ MachineInstance::MachineInstance(MachineInterface& interface)
     , _cpu(*this)
     , _mmu(*this)
     , _vdu(*this)
-    , _sio(*this)
+    , _sio0(*this,  0,  1)
+    , _sio1(*this, -1, -1)
 {
 }
 
 MachineInstance::~MachineInstance()
 {
-    _sio.print('\n');
+    _sio0.print('\n');
+    _sio1.print('\n');
 }
 
 auto MachineInstance::reset() -> void
@@ -64,9 +66,9 @@ auto MachineInstance::reset() -> void
         _state.sio_clock |= 0;
         _state.sio_ticks &= 0;
         _state.max_clock &= 0;
-        _state.hlt_req   &= 0;
-        _state.ready     &= false;
-        _state.stopped   &= false;
+        _state.hlt_count &= 0;
+        _state.stopped    = false;
+        _state.ready      = false;
 
         if(_state.cpu_clock >= _state.max_clock) {
             _state.max_clock = _state.cpu_clock;
@@ -100,7 +102,8 @@ auto MachineInstance::reset() -> void
 
     auto reset_sio = [&]() -> void
     {
-        _sio.reset();
+        _sio0.reset();
+        _sio1.reset();
     };
 
     auto reset_all = [&]() -> void
@@ -133,7 +136,8 @@ auto MachineInstance::clock() -> void
             }
             if((_state.sio_ticks += sio_clock) >= max_clock) {
                 _state.sio_ticks -= max_clock;
-                _sio.clock();
+                _sio0.clock();
+                _sio1.clock();
             }
         } while((_state.ready |= _state.stopped) == false);
     }
@@ -143,6 +147,7 @@ auto MachineInstance::stop() -> void
 {
     if(_state.stopped == false) {
         _state.stopped = true;
+        _state.ready   = true;
         _interface.quit();
     }
 }
@@ -169,43 +174,91 @@ auto MachineInstance::cpu_iorq_m1(cpu::Instance& cpu, uint16_t port, uint8_t dat
 
 auto MachineInstance::cpu_iorq_rd(cpu::Instance& cpu, uint16_t port, uint8_t data) -> uint8_t
 {
-    if(port == 0x0001) {
-        data = 0xff;
-    }
-    if((port & 0x0080) != 0) {
-        if((port & 0x0001) != 0) {
-            data = _sio.rd_acia_data(data);
+    auto rd_sio0 = [&]() -> void
+    {
+        if((port & 0x00c0) == 0x0080) {
+            if((port & 0x0001) != 0) {
+                data = _sio0.rd_data(data);
+            }
+            else {
+                data = _sio0.rd_stat(data);
+            }
+        }
+    };
+
+    auto rd_sio1 = [&]() -> void
+    {
+        if((port & 0x00c0) == 0x0040) {
+            if((port & 0x0001) != 0) {
+                data = _sio1.rd_data(data);
+            }
+            else {
+                data = _sio1.rd_stat(data);
+            }
+        }
+    };
+
+    auto iorq_rd = [&]() -> uint8_t
+    {
+        if(port == 0x0001) {
+            data = 0xff;
         }
         else {
-            data = _sio.rd_acia_stat(data);
+            rd_sio0();
+            rd_sio1();
         }
-    }
-    return data;
+        return data;
+    };
+
+    return iorq_rd();
 }
 
 auto MachineInstance::cpu_iorq_wr(cpu::Instance& cpu, uint16_t port, uint8_t data) -> uint8_t
 {
-    if(port == 0x0001) {
-        if(data == 0x00) {
-            if(++_state.hlt_req >= 2) {
+    auto wr_sio0 = [&]() -> void
+    {
+        if((port & 0x00c0) == 0x0080) {
+            if((port & 0x0001) != 0) {
+                data = _sio0.wr_data(data);
+            }
+            else {
+                data = _sio0.wr_ctrl(data);
+            }
+        }
+    };
+
+    auto wr_sio1 = [&]() -> void
+    {
+        if((port & 0x00c0) == 0x0040) {
+            if((port & 0x0001) != 0) {
+                data = _sio1.wr_data(data);
+            }
+            else {
+                data = _sio1.wr_ctrl(data);
+            }
+        }
+    };
+
+    auto iorq_wr = [&]() -> uint8_t
+    {
+        if(port == 0x0001) {
+            if(++_state.hlt_count == 2) {
                 stop();
             }
         }
-    }
-    if((port & 0x0080) != 0) {
-        if((port & 0x0001) != 0) {
-            data = _sio.wr_acia_data(data);
-        }
         else {
-            data = _sio.wr_acia_ctrl(data);
+            wr_sio0();
+            wr_sio1();
         }
-    }
-    return data;
+        return data;
+    };
+
+    return iorq_wr();
 }
 
 auto MachineInstance::mmu_char_wr(mmu::Instance& mmu, uint8_t data) -> uint8_t
 {
-    return _sio.print(data);
+    return _sio0.print(data);
 }
 
 auto MachineInstance::vdu_sync_hs(vdu::Instance& vdu, bool data) -> void

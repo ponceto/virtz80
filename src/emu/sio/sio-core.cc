@@ -124,23 +124,23 @@ namespace sio {
 
 struct ACIA
 {
-    static constexpr uint16_t SR_RDRF = 0b00000001; /* Receive Data Register Full   */
-    static constexpr uint16_t SR_TDRE = 0b00000010; /* Transmit Data Register Empty */
-    static constexpr uint16_t SR_DCD  = 0b00000100; /* Data Carrier Detect          */
-    static constexpr uint16_t SR_CTS  = 0b00001000; /* Clear-To-Send                */
-    static constexpr uint16_t SR_FE   = 0b00010000; /* Framing Error                */
-    static constexpr uint16_t SR_OVRN = 0b00100000; /* Receiver Overrun             */
-    static constexpr uint16_t SR_PE   = 0b01000000; /* Parity Error                 */
-    static constexpr uint16_t SR_IRQ  = 0b10000000; /* Interrupt Request            */
+    static constexpr uint8_t SR_RDRF = 0b00000001; /* Receive Data Register Full   */
+    static constexpr uint8_t SR_TDRE = 0b00000010; /* Transmit Data Register Empty */
+    static constexpr uint8_t SR_DCD  = 0b00000100; /* Data Carrier Detect          */
+    static constexpr uint8_t SR_CTS  = 0b00001000; /* Clear-To-Send                */
+    static constexpr uint8_t SR_FE   = 0b00010000; /* Framing Error                */
+    static constexpr uint8_t SR_OVRN = 0b00100000; /* Receiver Overrun             */
+    static constexpr uint8_t SR_PE   = 0b01000000; /* Parity Error                 */
+    static constexpr uint8_t SR_IRQ  = 0b10000000; /* Interrupt Request            */
 
-    static constexpr uint16_t CR_CR0  = 0b00000001; /* Counter Divide Select        */
-    static constexpr uint16_t CR_CR1  = 0b00000010; /* Counter Divide Select        */
-    static constexpr uint16_t CR_CR2  = 0b00000100; /* Word Select                  */
-    static constexpr uint16_t CR_CR3  = 0b00001000; /* Word Select                  */
-    static constexpr uint16_t CR_CR4  = 0b00010000; /* Word Select                  */
-    static constexpr uint16_t CR_CR5  = 0b00100000; /* Transmitter Control          */
-    static constexpr uint16_t CR_CR6  = 0b01000000; /* Transmitter Control          */
-    static constexpr uint16_t CR_IRQ  = 0b10000000; /* Receive Interrupt Enable     */
+    static constexpr uint8_t CR_CR0  = 0b00000001; /* Counter Divide Select        */
+    static constexpr uint8_t CR_CR1  = 0b00000010; /* Counter Divide Select        */
+    static constexpr uint8_t CR_CR2  = 0b00000100; /* Word Select                  */
+    static constexpr uint8_t CR_CR3  = 0b00001000; /* Word Select                  */
+    static constexpr uint8_t CR_CR4  = 0b00010000; /* Word Select                  */
+    static constexpr uint8_t CR_CR5  = 0b00100000; /* Transmitter Control          */
+    static constexpr uint8_t CR_CR6  = 0b01000000; /* Transmitter Control          */
+    static constexpr uint8_t CR_IRQ  = 0b10000000; /* Receive Interrupt Enable     */
 };
 
 }
@@ -151,20 +151,20 @@ struct ACIA
 
 namespace sio {
 
-Instance::Instance(Interface& interface)
+Instance::Instance(Interface& interface, int rx, int tx)
     : _interface(interface)
     , _state()
 {
+    _state.rx = rx;
+    _state.tx = tx;
 }
 
 auto Instance::reset() -> void
 {
-    if(_state.rx == -1) {
-        _state.rx = 0; /* stdin */
+    if(_state.rx != -1) {
         Terminal::setup_rx(_state.rx);
     }
-    if(_state.tx == -1) {
-        _state.tx = 1; /* stdout */
+    if(_state.tx != -1) {
         Terminal::setup_tx(_state.tx);
     }
     _state.status  = 0;
@@ -176,10 +176,10 @@ auto Instance::reset() -> void
 
 auto Instance::clock() -> void
 {
-    constexpr int acia_count = 2;
-    pollfd_type   pollfds[acia_count];
-    pollfd_type&  acia_rd(pollfds[0]);
-    pollfd_type&  acia_wr(pollfds[1]);
+    constexpr int count = 2;
+    pollfd_type   pollfds[count];
+    pollfd_type&  poll_rd(pollfds[0]);
+    pollfd_type&  poll_wr(pollfds[1]);
 
     auto do_init = [&]() -> void
     {
@@ -189,25 +189,25 @@ auto Instance::clock() -> void
             pollfd.revents =  0;
         }
         if((_state.rx >= 0) && ((_state.status & ACIA::SR_RDRF) == 0)) {
-            acia_rd.fd     = (_state.rx);
-            acia_rd.events = (POLLIN | POLLERR | POLLHUP);
+            poll_rd.fd     = (_state.rx);
+            poll_rd.events = (POLLIN | POLLERR | POLLHUP);
         }
         if((_state.tx >= 0) && ((_state.status & ACIA::SR_TDRE) == 0)) {
-            acia_wr.fd     = (_state.tx);
-            acia_wr.events = (POLLOUT | POLLERR | POLLHUP);
+            poll_wr.fd     = (_state.tx);
+            poll_wr.events = (POLLOUT | POLLERR | POLLHUP);
         }
     };
 
     auto do_poll = [&]() -> void
     {
-        const auto ready = ::poll(pollfds, acia_count, 0);
+        const auto ready = ::poll(pollfds, count, 0);
         if(ready > 0) {
-            if((acia_rd.revents & POLLIN) != 0) {
+            if((poll_rd.revents & POLLIN) != 0) {
                 _state.status |= (ACIA::SR_RDRF | ACIA::SR_IRQ);
                 const auto rc = ::read(_state.rx, &_state.rx_data, sizeof(_state.rx_data));
                 static_cast<void>(rc);
             }
-            if((acia_wr.revents & POLLOUT) != 0) {
+            if((poll_wr.revents & POLLOUT) != 0) {
                 _state.status |= (ACIA::SR_TDRE);
                 const auto rc = ::write(_state.tx, &_state.tx_data, sizeof(_state.tx_data));
                 static_cast<void>(rc);
@@ -230,39 +230,43 @@ auto Instance::clock() -> void
     return do_clock();
 }
 
-auto Instance::rd_acia_stat(uint8_t data) -> uint8_t
+auto Instance::rd_stat(uint8_t data) -> uint8_t
 {
     if(_state.enabled == 0) {
-        _state.status  &= ~ACIA::SR_RDRF; /* Receive Data Register Full   */
-        _state.status  |=  ACIA::SR_TDRE; /* Transmit Data Register Empty */
-        _state.status  &= ~ACIA::SR_DCD;  /* Data Carrier Detect          */
-        _state.status  &= ~ACIA::SR_CTS;  /* Clear-To-Send                */
-        _state.status  &= ~ACIA::SR_FE;   /* Framing Error                */
-        _state.status  &= ~ACIA::SR_OVRN; /* Receiver Overrun             */
-        _state.status  &= ~ACIA::SR_PE;   /* Parity Error                 */
-        _state.status  &= ~ACIA::SR_IRQ;  /* Interrupt Request            */
-        _state.enabled |=  1;
+        _state.status &= ~ACIA::SR_RDRF; /* Receive Data Register Full   */
+        _state.status |=  ACIA::SR_TDRE; /* Transmit Data Register Empty */
+        _state.status &= ~ACIA::SR_DCD;  /* Data Carrier Detect          */
+        _state.status &= ~ACIA::SR_CTS;  /* Clear-To-Send                */
+        _state.status &= ~ACIA::SR_FE;   /* Framing Error                */
+        _state.status &= ~ACIA::SR_OVRN; /* Receiver Overrun             */
+        _state.status &= ~ACIA::SR_PE;   /* Parity Error                 */
+        _state.status &= ~ACIA::SR_IRQ;  /* Interrupt Request            */
+        if((_state.rx >= 0) || (_state.tx >= 0)) {
+            _state.enabled |= 1;
+        }
     }
     return data = _state.status;
 }
 
-auto Instance::wr_acia_ctrl(uint8_t data) -> uint8_t
+auto Instance::wr_ctrl(uint8_t data) -> uint8_t
 {
     if(_state.enabled == 0) {
-        _state.status  &= ~ACIA::SR_RDRF; /* Receive Data Register Full   */
-        _state.status  |=  ACIA::SR_TDRE; /* Transmit Data Register Empty */
-        _state.status  &= ~ACIA::SR_DCD;  /* Data Carrier Detect          */
-        _state.status  &= ~ACIA::SR_CTS;  /* Clear-To-Send                */
-        _state.status  &= ~ACIA::SR_FE;   /* Framing Error                */
-        _state.status  &= ~ACIA::SR_OVRN; /* Receiver Overrun             */
-        _state.status  &= ~ACIA::SR_PE;   /* Parity Error                 */
-        _state.status  &= ~ACIA::SR_IRQ;  /* Interrupt Request            */
-        _state.enabled |=  1;
+        _state.status &= ~ACIA::SR_RDRF; /* Receive Data Register Full   */
+        _state.status |=  ACIA::SR_TDRE; /* Transmit Data Register Empty */
+        _state.status &= ~ACIA::SR_DCD;  /* Data Carrier Detect          */
+        _state.status &= ~ACIA::SR_CTS;  /* Clear-To-Send                */
+        _state.status &= ~ACIA::SR_FE;   /* Framing Error                */
+        _state.status &= ~ACIA::SR_OVRN; /* Receiver Overrun             */
+        _state.status &= ~ACIA::SR_PE;   /* Parity Error                 */
+        _state.status &= ~ACIA::SR_IRQ;  /* Interrupt Request            */
+        if((_state.rx >= 0) || (_state.tx >= 0)) {
+            _state.enabled |= 1;
+        }
     }
     return _state.control = data;
 }
 
-auto Instance::rd_acia_data(uint8_t data) -> uint8_t
+auto Instance::rd_data(uint8_t data) -> uint8_t
 {
     if((_state.status & ACIA::SR_RDRF) != 0) {
         _state.status &= ~(ACIA::SR_RDRF | ACIA::SR_IRQ);
@@ -274,7 +278,7 @@ auto Instance::rd_acia_data(uint8_t data) -> uint8_t
     return data;
 }
 
-auto Instance::wr_acia_data(uint8_t data) -> uint8_t
+auto Instance::wr_data(uint8_t data) -> uint8_t
 {
 #ifdef __EMSCRIPTEN__
     if(data == '\r') {

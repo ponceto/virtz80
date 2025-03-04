@@ -56,7 +56,7 @@ namespace sio {
 class Instance
 {
 public: // public interface
-    Instance(Interface&);
+    Instance(Interface&, int rx, int tx);
 
     Instance(const Instance&) = delete;
 
@@ -68,13 +68,13 @@ public: // public interface
 
     auto clock() -> void;
 
-    auto rd_acia_stat(uint8_t data) -> uint8_t;
+    auto rd_stat(uint8_t data) -> uint8_t;
 
-    auto wr_acia_ctrl(uint8_t data) -> uint8_t;
+    auto wr_ctrl(uint8_t data) -> uint8_t;
 
-    auto rd_acia_data(uint8_t data) -> uint8_t;
+    auto rd_data(uint8_t data) -> uint8_t;
 
-    auto wr_acia_data(uint8_t data) -> uint8_t;
+    auto wr_data(uint8_t data) -> uint8_t;
 
     auto print(uint8_t data) -> uint8_t;
 
