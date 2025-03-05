@@ -67,6 +67,7 @@ auto MachineInstance::reset() -> void
         _state.sio_ticks &= 0;
         _state.max_clock &= 0;
         _state.hlt_count &= 0;
+        _state.wdt_count &= 0;
         _state.stopped    = false;
         _state.ready      = false;
 
@@ -139,6 +140,11 @@ auto MachineInstance::clock() -> void
                 _sio0.clock();
                 _sio1.clock();
             }
+#ifdef ENABLE_WATCHDOG
+            if(--_state.wdt_count == 0) {
+                reset();
+            }
+#endif
         } while((_state.ready |= _state.stopped) == false);
     }
 }

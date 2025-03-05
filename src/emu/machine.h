@@ -65,6 +65,7 @@ struct MachineState
     uint32_t sio_ticks = 0;       /* sio ticks          */
     uint32_t max_clock = 0;       /* max clock          */
     uint32_t hlt_count = 0;       /* halt request       */
+    uint32_t wdt_count = 0;       /* watchdog           */
     bool     stopped   = false;   /* emulation stopped  */
     bool     ready     = false;   /* a frame is ready   */
 };

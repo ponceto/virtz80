@@ -125,6 +125,9 @@ auto Program::init(const ArgList& args) -> bool
             else if(arg == "--basic") {
                 Globals::bank0 = "assets/basic.rom";
             }
+            else if(arg == "--scm10") {
+                Globals::bank0 = "assets/scm10.rom";
+            }
             else if(arg == "--turbo") {
                 Globals::turbo = true;
             }
@@ -214,6 +217,7 @@ auto Program::help(const ArgList& args) -> void
         stream << "  --zexall                      run the Zexall test suite"          << std::endl;
         stream << "  --zexdoc                      run the Zexdoc test suite"          << std::endl;
         stream << "  --basic                       run the Microsoft BASIC"            << std::endl;
+        stream << "  --scm10                       run the Small Computer Monitor 1.0" << std::endl;
         stream << "  --turbo                       run the emulation at maximum speed" << std::endl;
         stream << ""                                                                   << std::endl;
         stream << "  --bank0={filename}            specifies the ram bank #0 (16kB)"   << std::endl;

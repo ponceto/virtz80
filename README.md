@@ -116,6 +116,7 @@ Options:
   --zexall                      run the Zexall test suite
   --zexdoc                      run the Zexdoc test suite
   --basic                       run the Microsoft BASIC
+  --scm10                       run the Small Computer Monitor 1.0
   --turbo                       run the emulation at maximum speed
 
   --bank0={filename}            specifies the ram bank #0 (16kB)
@@ -231,6 +232,8 @@ Tests complete
 
 ### Run Microsoft BASIC
 
+The virtual machine supports the Microsoft BASIC from the original Nascom 2 and adapted by Grant Searle for his [simple Z80 board](http://searle.x10host.com/z80/SimpleZ80.html).
+
 Run the virtual machine with the `--basic` option.
 
 ```
@@ -248,6 +251,45 @@ Z80 BASIC Ver 4.7b
 Copyright (C) 1978 by Microsoft
 32382 Bytes free
 Ok
+```
+
+### Run Small Computer Monitor
+
+The virtual machine supports the [Small Computer Monitor](https://smallcomputercentral.com/small-computer-monitor/) written by Stephen C Cousins.
+
+Run the virtual machine with the `--scm10` option.
+
+```
+./virtz80.bin --scm10
+```
+
+Expected result:
+
+```
+UU
+
+Small Computer Monitor - RC2014
+*
+```
+
+Then, type `help`:
+
+```
+*help
+Small Computer Monitor by Stephen C Cousins (www.scc.me.uk)
+Version 1.0.0 configuration R1 for Z80 based RC2014 systems
+
+Monitor commands:
+A [<address>]  = Assemble        |  D [<address>]   = Disassemble
+M [<address>]  = Memory display  |  E [<address>]   = Edit memory
+R [<name>]     = Registers/edit  |  F [<name>]      = Flags/edit
+B [<address>]  = Breakpoint      |  S [<address>]   = Single step
+I <port>       = Input from port |  O <port> <data> = Output to port
+G [<address>]  = Go to program
+BAUD <device> <rate>             |  CONSOLE <device>
+FILL <start> <end> <byte>        |  API <function> [<A>] [<DE>]
+DEVICES, DIR, HELP, RESET
+*
 ```
 
 ### Run the WASM version
@@ -323,5 +365,38 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
+```
+
+### Microsoft BASIC
+
+The Microsoft BASIC is released under the copyright of Microsoft.
+
+```
+NASCOM ROM BASIC Ver 4.7, (C) 1978 Microsoft
+```
+
+### Small Computer Monitor
+
+The Small Computer Monitor is released under the copyright of Stephen C Cousins.
+
+```
+**************************************************************
+**                     Copyright notice                     **
+**                                                          **
+**  This software is very nearly 100% my own work so I am   **
+**  entitled to claim copyright and to grant licences to    **
+**  others.                                                 **
+**                                                          **
+**  You are free to use this software for non-commercial    **
+**  purposes provided it retains this copyright notice and  **
+**  is clearly credited to me where appropriate.            **
+**                                                          **
+**  You are free to modify this software as you see fit     **
+**  for your own use. You may also distribute derived       **
+**  works provided they remain free of charge, are          **
+**  appropriately credited and grant the same freedoms.     **
+**                                                          **
+**                    Stephen C Cousins                     **
+**************************************************************
 ```
 
