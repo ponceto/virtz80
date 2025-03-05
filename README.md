@@ -36,7 +36,7 @@ Notes:
 
   - The `CPU` is clocked at `7.372800Mhz`, just like a standard [RC2014](https://rc2014.co.uk/) board.
   - The `VDU` is clocked at `4.134375Mhz`, emulating a virtual 60Hz display (only used for real-time synchronization purpose).
-  - The `SIO` is clocked at `115.200KHz`, emulating a MC6850 ACIA (Asynchronous Communications Interface Adapter) serial I/O.
+  - The `SIO` are clocked at `115.200KHz`, emulating two MC6850 ACIA (Asynchronous Communications Interface Adapter) for serial Input/Output.
 
 By default, the virtual machine loads and runs the `zexall` test suite available in the `assets` folder, but you can also run the Microsoft BASIC.
 
