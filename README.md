@@ -230,7 +230,7 @@ ld (<bc,de>),a................  OK
 Tests complete
 ```
 
-### Run Microsoft BASIC
+### Run the Microsoft BASIC
 
 The virtual machine supports the Microsoft BASIC from the original Nascom 2 and adapted by Grant Searle for his [simple Z80 board](http://searle.x10host.com/z80/SimpleZ80.html).
 
@@ -253,7 +253,7 @@ Copyright (C) 1978 by Microsoft
 Ok
 ```
 
-### Run Small Computer Monitor
+### Run the Small Computer Monitor
 
 The virtual machine supports the [Small Computer Monitor](https://smallcomputercentral.com/small-computer-monitor/) written by Stephen C Cousins.
 
@@ -298,6 +298,12 @@ To run the WASM version, you can use the Python built-in http server:
 
 ```
 python3 -m http.server
+```
+
+or use the `Makefile.wasm`:
+
+```
+make -f Makefile.wasm serve
 ```
 
 Then open your browser and point to [localhost/virtz80.html](http://127.0.0.1:8000/virtz80.html)
