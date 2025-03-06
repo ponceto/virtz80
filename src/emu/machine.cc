@@ -206,7 +206,7 @@ auto MachineInstance::cpu_iorq_rd(cpu::Instance& cpu, uint16_t port, uint8_t dat
 
     auto iorq_rd = [&]() -> uint8_t
     {
-        if(port == 0x0001) {
+        if((port & 0x00ff) == 0x0001) {
             data = 0xff;
         }
         else {
@@ -247,7 +247,7 @@ auto MachineInstance::cpu_iorq_wr(cpu::Instance& cpu, uint16_t port, uint8_t dat
 
     auto iorq_wr = [&]() -> uint8_t
     {
-        if(port == 0x0001) {
+        if((port & 0x00ff) == 0x0001) {
             if(++_state.hlt_count == 2) {
                 stop();
             }
