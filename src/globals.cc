@@ -41,7 +41,8 @@
 
 namespace core {
 
-bool        Globals::turbo = false;
+bool        Globals::verbose = false;
+bool        Globals::turbo   = false;
 std::string Globals::bank0;
 std::string Globals::bank1;
 std::string Globals::bank2;

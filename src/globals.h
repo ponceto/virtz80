@@ -27,6 +27,7 @@ struct Globals
 {
     static auto init() -> void;
 
+    static bool        verbose;
     static bool        turbo;
     static std::string bank0;
     static std::string bank1;

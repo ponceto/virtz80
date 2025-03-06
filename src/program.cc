@@ -110,23 +110,11 @@ auto Program::init(const ArgList& args) -> bool
             if(++argi == 0) {
                 continue;
             }
-            else if(arg == "-h") {
+            else if((arg == "-h") || (arg == "--help")) {
                 return false;
             }
-            else if(arg == "--help") {
-                return false;
-            }
-            else if(arg == "--zexall") {
-                Globals::bank0 = "assets/zexall.rom";
-            }
-            else if(arg == "--zexdoc") {
-                Globals::bank0 = "assets/zexdoc.rom";
-            }
-            else if(arg == "--basic") {
-                Globals::bank0 = "assets/basic.rom";
-            }
-            else if(arg == "--scm10") {
-                Globals::bank0 = "assets/scm10.rom";
+            else if((arg == "-v") || (arg == "--verbose")) {
+                Globals::verbose = true;
             }
             else if(arg == "--turbo") {
                 Globals::turbo = true;
@@ -142,6 +130,18 @@ auto Program::init(const ArgList& args) -> bool
             }
             else if(arg_is(arg, "--bank3")) {
                 Globals::bank3 = arg_val(arg);
+            }
+            else if(arg == "zexall") {
+                Globals::bank0 = "assets/zexall.rom";
+            }
+            else if(arg == "zexdoc") {
+                Globals::bank0 = "assets/zexdoc.rom";
+            }
+            else if(arg == "basic") {
+                Globals::bank0 = "assets/basic.rom";
+            }
+            else if(arg == "scm10") {
+                Globals::bank0 = "assets/scm10.rom";
             }
             else {
                 throw std::runtime_error(std::string("invalid argument") + ' ' + '\'' + arg + '\'');
@@ -189,15 +189,16 @@ auto Program::main(const ArgList& args) -> void
 
     auto do_main = [&](std::ostream& stream) -> void
     {
-        stream << "Z80 Virtual Machine"                               << std::endl;
-        stream << ""                                                  << std::endl;
-        stream << "  - turbo" << " ... " << yes_or_no(Globals::turbo) << std::endl;
-        stream << "  - bank0" << " ... " << Globals::bank0            << std::endl;
-        stream << "  - bank1" << " ... " << Globals::bank1            << std::endl;
-        stream << "  - bank2" << " ... " << Globals::bank2            << std::endl;
-        stream << "  - bank3" << " ... " << Globals::bank3            << std::endl;
-        stream << ""                                                  << std::endl;
-
+        if(Globals::verbose != false) {
+            stream << "Z80 Virtual Machine"                               << std::endl;
+            stream << ""                                                  << std::endl;
+            stream << "  - turbo" << " ... " << yes_or_no(Globals::turbo) << std::endl;
+            stream << "  - bank0" << " ... " << Globals::bank0            << std::endl;
+            stream << "  - bank1" << " ... " << Globals::bank1            << std::endl;
+            stream << "  - bank2" << " ... " << Globals::bank2            << std::endl;
+            stream << "  - bank3" << " ... " << Globals::bank3            << std::endl;
+            stream << ""                                                  << std::endl;
+        }
         return main_loop();
     };
 
@@ -208,22 +209,25 @@ auto Program::help(const ArgList& args) -> void
 {
     auto do_help = [&](std::ostream& stream) -> void
     {
-        stream << "Usage: " << program_name(args) << " [OPTIONS...]"                   << std::endl;
+        stream << "Usage: " << program_name(args) << " [OPTIONS...] APP"               << std::endl;
         stream << ""                                                                   << std::endl;
         stream << "Options:"                                                           << std::endl;
         stream << ""                                                                   << std::endl;
         stream << "  -h, --help                    display this help and exit"         << std::endl;
+        stream << "  -v, --verbose                 verbose mode"                       << std::endl;
         stream << ""                                                                   << std::endl;
-        stream << "  --zexall                      run the Zexall test suite"          << std::endl;
-        stream << "  --zexdoc                      run the Zexdoc test suite"          << std::endl;
-        stream << "  --basic                       run the Microsoft BASIC"            << std::endl;
-        stream << "  --scm10                       run the Small Computer Monitor 1.0" << std::endl;
         stream << "  --turbo                       run the emulation at maximum speed" << std::endl;
-        stream << ""                                                                   << std::endl;
         stream << "  --bank0={filename}            specifies the ram bank #0 (16kB)"   << std::endl;
         stream << "  --bank1={filename}            specifies the ram bank #1 (16kB)"   << std::endl;
         stream << "  --bank2={filename}            specifies the ram bank #2 (16kB)"   << std::endl;
         stream << "  --bank3={filename}            specifies the ram bank #3 (16kB)"   << std::endl;
+        stream << ""                                                                   << std::endl;
+        stream << "Applications:"                                                      << std::endl;
+        stream << ""                                                                   << std::endl;
+        stream << "  zexall                        run the Zexall test suite"          << std::endl;
+        stream << "  zexdoc                        run the Zexdoc test suite"          << std::endl;
+        stream << "  basic                         run the Microsoft BASIC"            << std::endl;
+        stream << "  scm10                         run the Small Computer Monitor 1.0" << std::endl;
         stream << ""                                                                   << std::endl;
     };
 

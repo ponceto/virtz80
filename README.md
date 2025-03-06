@@ -107,30 +107,35 @@ The project comes with a simple virtual machine which is able to run the `zexall
 Command line options:
 
 ```
-Usage: virtz80.bin [OPTIONS...]
+Usage: virtz80.bin [OPTIONS...] APP
 
 Options:
 
   -h, --help                    display this help and exit
+  -v, --verbose                 verbose mode
 
-  --zexall                      run the Zexall test suite
-  --zexdoc                      run the Zexdoc test suite
-  --basic                       run the Microsoft BASIC
-  --scm10                       run the Small Computer Monitor 1.0
   --turbo                       run the emulation at maximum speed
-
   --bank0={filename}            specifies the ram bank #0 (16kB)
   --bank1={filename}            specifies the ram bank #1 (16kB)
   --bank2={filename}            specifies the ram bank #2 (16kB)
   --bank3={filename}            specifies the ram bank #3 (16kB)
 
+Applications:
+
+  zexall                        run the Zexall test suite
+  zexdoc                        run the Zexdoc test suite
+  basic                         run the Microsoft BASIC
+  scm10                         run the Small Computer Monitor 1.0
+
 ```
 
 ### Run the Z80 instruction set exerciser
 
-Run the virtual machine with or without the `--zexall` or the `--zexdoc` option.
+The virtual machine is able to run the Zexall and Zexdoc Z80 instruction set exerciser.
 
-It is recommended to pass the `--turbo` option, because the Zexall and Zexdoc tests run for a very long time.
+Run the virtual machine with or without the `zexall` or the `zexdoc` argument.
+
+It is highly recommended to pass the `--turbo` option, because the Zexall and Zexdoc tests run for a very long time.
 
 ```
 ./virtz80.bin --turbo
@@ -139,26 +144,18 @@ It is recommended to pass the `--turbo` option, because the Zexall and Zexdoc te
 or
 
 ```
-./virtz80.bin --zexall --turbo
+./virtz80.bin --turbo zexall
 ```
 
 or
 
 ```
-./virtz80.bin --zexdoc --turbo
+./virtz80.bin --turbo zexdoc
 ```
 
 Expected result:
 
 ```
-Z80 Virtual Machine
-
-  - turbo ... yes
-  - bank0 ... assets/zexall.rom
-  - bank1 ... assets/bank1.rom
-  - bank2 ... assets/bank2.rom
-  - bank3 ... assets/bank3.rom
-
 Z80 instruction exerciser
 <adc,sbc> hl,<bc,de,hl,sp>....  OK
 add hl,<bc,de,hl,sp>..........  OK
@@ -232,12 +229,12 @@ Tests complete
 
 ### Run the Microsoft BASIC
 
-The virtual machine supports the Microsoft BASIC from the original Nascom 2 and adapted by Grant Searle for his [simple Z80 board](http://searle.x10host.com/z80/SimpleZ80.html).
+The virtual machine is able to run the Microsoft BASIC from the original Nascom 2 which was adapted by Grant Searle for his [simple Z80 board](http://searle.x10host.com/z80/SimpleZ80.html).
 
-Run the virtual machine with the `--basic` option.
+Run the virtual machine with the `basic` argument.
 
 ```
-./virtz80.bin --basic
+./virtz80.bin basic
 ```
 
 Expected result:
@@ -255,12 +252,12 @@ Ok
 
 ### Run the Small Computer Monitor
 
-The virtual machine supports the [Small Computer Monitor](https://smallcomputercentral.com/small-computer-monitor/) written by Stephen C Cousins.
+The virtual machine is able to run the [Small Computer Monitor](https://smallcomputercentral.com/small-computer-monitor/) written by Stephen C Cousins.
 
-Run the virtual machine with the `--scm10` option.
+Run the virtual machine with the `scm10` argument.
 
 ```
-./virtz80.bin --scm10
+./virtz80.bin scm10
 ```
 
 Expected result:
