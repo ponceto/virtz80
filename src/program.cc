@@ -116,6 +116,9 @@ auto Program::init(const ArgList& args) -> bool
             else if((arg == "-v") || (arg == "--verbose")) {
                 Globals::verbose = true;
             }
+            else if((arg == "-q") || (arg == "--quiet")) {
+                Globals::verbose = false;
+            }
             else if(arg == "--turbo") {
                 Globals::turbo = true;
             }
@@ -140,8 +143,8 @@ auto Program::init(const ArgList& args) -> bool
             else if(arg == "basic") {
                 Globals::bank0 = "assets/basic.rom";
             }
-            else if(arg == "scm10") {
-                Globals::bank0 = "assets/scm10.rom";
+            else if(arg == "monitor") {
+                Globals::bank0 = "assets/monitor.rom";
             }
             else {
                 throw std::runtime_error(std::string("invalid argument") + ' ' + '\'' + arg + '\'');
@@ -215,6 +218,7 @@ auto Program::help(const ArgList& args) -> void
         stream << ""                                                                   << std::endl;
         stream << "  -h, --help                    display this help and exit"         << std::endl;
         stream << "  -v, --verbose                 verbose mode"                       << std::endl;
+        stream << "  -q, --quiet                   quiet mode"                         << std::endl;
         stream << ""                                                                   << std::endl;
         stream << "  --turbo                       run the emulation at maximum speed" << std::endl;
         stream << "  --bank0={filename}            specifies the ram bank #0 (16kB)"   << std::endl;
@@ -227,7 +231,7 @@ auto Program::help(const ArgList& args) -> void
         stream << "  zexall                        run the Zexall test suite"          << std::endl;
         stream << "  zexdoc                        run the Zexdoc test suite"          << std::endl;
         stream << "  basic                         run the Microsoft BASIC"            << std::endl;
-        stream << "  scm10                         run the Small Computer Monitor 1.0" << std::endl;
+        stream << "  monitor                       run the Small Computer Monitor"     << std::endl;
         stream << ""                                                                   << std::endl;
     };
 

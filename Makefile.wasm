@@ -110,14 +110,14 @@ virtz80_OBJECTS = \
 virtz80_LDFLAGS = \
 	--shell-file emsdk/shell.html \
 	--use-preload-plugins \
-	--preload-file assets/zexall.rom \
-	--preload-file assets/zexdoc.rom \
-	--preload-file assets/basic.rom \
-	--preload-file assets/scm10.rom \
 	--preload-file assets/bank0.rom \
 	--preload-file assets/bank1.rom \
 	--preload-file assets/bank2.rom \
 	--preload-file assets/bank3.rom \
+	--preload-file assets/zexall.rom \
+	--preload-file assets/zexdoc.rom \
+	--preload-file assets/basic.rom \
+	--preload-file assets/monitor.rom \
 	$(NULL)
 
 virtz80_LDADD = \

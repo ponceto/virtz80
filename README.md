@@ -8,9 +8,9 @@ This project is designed to emulate the venerable [Z80 CPU](https://en.wikipedia
 
 ## THE Z80 EMULATOR
 
-The Z80 emulation core was extracted from [Xcpc](https://www.xcpc-emulator.net/), my Amstrad CPC 464/664/6128 emulator for Linux, BSD and UNIX.
+The Z80 emulator was extracted from [Xcpc](https://www.xcpc-emulator.net/), my Amstrad CPC 464/664/6128 emulator for Linux, BSD and UNIX.
 
-The Z80 emulation core supports all documented and undocumented instructions and flags and passes `zexall` test suite.
+The Z80 emulation core supports all documented and undocumented instructions and flags and passes the well known `zexall` and `zexdoc` test suites.
 
 ## THE VIRTUAL MACHINE
 
@@ -38,7 +38,7 @@ Notes:
   - The `VDU` is clocked at `4.134375Mhz`, emulating a virtual 60Hz display (only used for real-time synchronization purpose).
   - The `SIO` are clocked at `115.200KHz`, emulating two MC6850 ACIA (Asynchronous Communications Interface Adapter) for serial Input/Output.
 
-By default, the virtual machine loads and runs the `zexall` test suite available in the `assets` folder, but you can also run the Microsoft BASIC.
+By default, the virtual machine will load and runs the `zexall` test suite available in the `assets` folder, but you can also run the Microsoft BASIC or the Small Computer Monitor.
 
 ## HOW TO BUILD
 
@@ -54,7 +54,7 @@ In order to build the [WASM](https://en.wikipedia.org/wiki/WebAssembly) version,
 
 ### Configure the project
 
-The project is preconfigured for a `little endian` target architecture (least significant byte first, eg. `x86_64`).
+The project is preconfigured for a `little endian` host architecture (least significant byte first, eg. `x86_64`).
 
 If your target architecture is `big endian` (most significant byte first, e.g. `Sparc`), you must replace `-DLSB_FIRST` with `-DMSB_FIRST` in the Makefile.
 
@@ -100,7 +100,7 @@ make -f Makefile.wasm clean
 
 ## HOW TO RUN
 
-The project comes with a simple virtual machine which is able to run the `zexall` and `zexdoc` test suites and the Microsoft BASIC.
+The project comes with a simple virtual machine which is able to run the Z80 instruction set exerciser, the Microsoft BASIC and the Small Computer Monitor.
 
 ### Usage
 
@@ -113,6 +113,7 @@ Options:
 
   -h, --help                    display this help and exit
   -v, --verbose                 verbose mode
+  -q, --quiet                   quiet mode
 
   --turbo                       run the emulation at maximum speed
   --bank0={filename}            specifies the ram bank #0 (16kB)
@@ -125,17 +126,17 @@ Applications:
   zexall                        run the Zexall test suite
   zexdoc                        run the Zexdoc test suite
   basic                         run the Microsoft BASIC
-  scm10                         run the Small Computer Monitor 1.0
+  monitor                       run the Small Computer Monitor
 
 ```
 
-### Run the Z80 instruction set exerciser
+### How to run the Z80 instruction set exerciser
 
 The virtual machine is able to run the Zexall and Zexdoc Z80 instruction set exerciser.
 
-Run the virtual machine with or without the `zexall` or the `zexdoc` argument.
+Run the virtual machine with or without the `zexall` or `zexdoc` argument.
 
-It is highly recommended to pass the `--turbo` option, because the Zexall and Zexdoc tests run for a very long time.
+It is strongly recommended to pass the `--turbo` option as the Zexall and Zexdoc tests can run for a very long time.
 
 ```
 ./virtz80.bin --turbo
@@ -227,9 +228,9 @@ ld (<bc,de>),a................  OK
 Tests complete
 ```
 
-### Run the Microsoft BASIC
+### How to run the Microsoft BASIC
 
-The virtual machine is able to run the Microsoft BASIC from the original Nascom 2 which was adapted by Grant Searle for his [simple Z80 board](http://searle.x10host.com/z80/SimpleZ80.html).
+The virtual machine is able to run the Microsoft BASIC 4.7 from the original [Nascom 2](https://en.wikipedia.org/wiki/Nascom) which was adapted by Grant Searle for his [simple Z80 board](http://searle.x10host.com/z80/SimpleZ80.html).
 
 Run the virtual machine with the `basic` argument.
 
@@ -250,14 +251,14 @@ Copyright (C) 1978 by Microsoft
 Ok
 ```
 
-### Run the Small Computer Monitor
+### How to run the Small Computer Monitor
 
 The virtual machine is able to run the [Small Computer Monitor](https://smallcomputercentral.com/small-computer-monitor/) written by Stephen C Cousins.
 
-Run the virtual machine with the `scm10` argument.
+Run the virtual machine with the `monitor` argument.
 
 ```
-./virtz80.bin scm10
+./virtz80.bin monitor
 ```
 
 Expected result:
@@ -289,7 +290,7 @@ DEVICES, DIR, HELP, RESET
 *
 ```
 
-### Run the WASM version
+### How to run the WASM version
 
 To run the WASM version, you can use the Python built-in http server:
 
@@ -301,6 +302,13 @@ or use the `Makefile.wasm`:
 
 ```
 make -f Makefile.wasm serve
+```
+
+Expected results:
+
+```
+python3 -m http.server
+Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
 ```
 
 Then open your browser and point to [localhost/virtz80.html](http://127.0.0.1:8000/virtz80.html)
