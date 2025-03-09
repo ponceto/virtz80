@@ -1,5 +1,5 @@
 /*
- * globals.h - Copyright (c) 2001-2025 - Olivier Poncet
+ * globals.cc - Copyright (c) 2001-2025 - Olivier Poncet
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,31 +14,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __CORE_Globals_h__
-#define __CORE_Globals_h__
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cstdint>
+#include <cstdarg>
+#include <chrono>
+#include <thread>
+#include <memory>
+#include <string>
+#include <vector>
+#include <iostream>
+#include <stdexcept>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+#include "globals.h"
 
 // ---------------------------------------------------------------------------
-// core::Globals
+// app::Globals
 // ---------------------------------------------------------------------------
 
-namespace core {
+namespace app {
 
-struct Globals
-{
-    static auto init() -> void;
-
-    static bool        verbose;
-    static bool        turbo;
-    static std::string bank0;
-    static std::string bank1;
-    static std::string bank2;
-    static std::string bank3;
-};
+bool        Globals::verbose = false;
+bool        Globals::turbo   = false;
+std::string Globals::bank0   = "assets/zexall.rom";
+std::string Globals::bank1   = "assets/bank1.rom";
+std::string Globals::bank2   = "assets/bank2.rom";
+std::string Globals::bank3   = "assets/bank3.rom";
 
 }
 
 // ---------------------------------------------------------------------------
 // End-Of-File
 // ---------------------------------------------------------------------------
-
-#endif /* __CORE_Globals_h__ */

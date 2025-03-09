@@ -1,5 +1,5 @@
 /*
- * machine.h - Copyright (c) 2001-2025 - Olivier Poncet
+ * virtual-machine.h - Copyright (c) 2001-2025 - Olivier Poncet
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __EMU_Machine_h__
-#define __EMU_Machine_h__
+#ifndef __EMU_VirtualMachine_h__
+#define __EMU_VirtualMachine_h__
 
-#include "cpu/cpu-core.h"
-#include "mmu/mmu-core.h"
-#include "vdu/vdu-core.h"
-#include "sio/sio-core.h"
+#include "dev/cpu/cpu-core.h"
+#include "dev/mmu/mmu-core.h"
+#include "dev/vdu/vdu-core.h"
+#include "dev/sio/sio-core.h"
 
 // ---------------------------------------------------------------------------
 // forward declarations
@@ -28,34 +28,18 @@
 
 namespace emu {
 
-class MachineInstance;
-class MachineInterface;
+class VirtualMachine;
+class VirtualMachineIface;
 
 }
 
 // ---------------------------------------------------------------------------
-// emu::MachineSetup
+// emu::VirtualMachineState
 // ---------------------------------------------------------------------------
 
 namespace emu {
 
-struct MachineSetup
-{
-    std::string bank0 = core::Globals::bank0;
-    std::string bank1 = core::Globals::bank1;
-    std::string bank2 = core::Globals::bank2;
-    std::string bank3 = core::Globals::bank3;
-};
-
-}
-
-// ---------------------------------------------------------------------------
-// emu::MachineState
-// ---------------------------------------------------------------------------
-
-namespace emu {
-
-struct MachineState
+struct VirtualMachineState
 {
     uint32_t cpu_clock = 7372800; /* cpu clock (RC2014) */
     uint32_t cpu_ticks = 0;       /* cpu ticks          */
@@ -73,25 +57,25 @@ struct MachineState
 }
 
 // ---------------------------------------------------------------------------
-// emu::MachineInstance
+// emu::VirtualMachine
 // ---------------------------------------------------------------------------
 
 namespace emu {
 
-class MachineInstance final
+class VirtualMachine final
     : private cpu::Interface
     , private mmu::Interface
     , private vdu::Interface
     , private sio::Interface
 {
 public: // public interface
-    MachineInstance(MachineInterface&);
+    VirtualMachine(VirtualMachineIface&);
 
-    MachineInstance(const MachineInstance&) = delete;
+    VirtualMachine(const VirtualMachine&) = delete;
 
-    MachineInstance& operator=(const MachineInstance&) = delete;
+    VirtualMachine& operator=(const VirtualMachine&) = delete;
 
-    virtual ~MachineInstance();
+    virtual ~VirtualMachine();
 
     auto reset() -> void;
 
@@ -113,7 +97,7 @@ private: // private cpu interface
     virtual auto cpu_iorq_wr(cpu::Instance&, uint16_t port, uint8_t data) -> uint8_t override final;
 
 private: // private mmu interface
-    virtual auto mmu_char_wr(mmu::Instance&, uint8_t data) -> uint8_t override final;
+    virtual auto mmu_char_wr(mmu::Instance&, uint8_t data) -> void override final;
 
 private: // private vdu interface
     virtual auto vdu_sync_hs(vdu::Instance&, bool hsync) -> void override final;
@@ -124,36 +108,39 @@ private: // private sio interface
     virtual auto sio_intr_rq(sio::Instance&) -> void override final;
 
 private: // private data
-    MachineInterface& _interface;
-    MachineSetup      _setup;
-    MachineState      _state;
-    cpu::Instance     _cpu;
-    mmu::Instance     _mmu;
-    vdu::Instance     _vdu;
-    sio::Instance     _sio0;
-    sio::Instance     _sio1;
+    VirtualMachineIface& _iface;
+    VirtualMachineState  _state;
+    cpu::Instance        _cpu;
+    mmu::Instance        _mmu;
+    vdu::Instance        _vdu;
+    sio::Instance        _sio0;
+    sio::Instance        _sio1;
 };
 
 }
 
 // ---------------------------------------------------------------------------
-// emu::MachineInterface
+// emu::VirtualMachineIface
 // ---------------------------------------------------------------------------
 
 namespace emu {
 
-class MachineInterface
+class VirtualMachineIface
 {
 public: // public interface
-    MachineInterface() = default;
+    VirtualMachineIface() = default;
 
-    MachineInterface(const MachineInterface&) = default;
+    VirtualMachineIface(const VirtualMachineIface&) = default;
 
-    MachineInterface& operator=(const MachineInterface&) = default;
+    VirtualMachineIface& operator=(const VirtualMachineIface&) = default;
 
-    virtual ~MachineInterface() = default;
+    virtual ~VirtualMachineIface() = default;
+
+    virtual auto loop() -> void = 0;
 
     virtual auto quit() -> void = 0;
+
+    virtual auto get(const std::string& name) -> std::string = 0;
 };
 
 }
@@ -162,4 +149,4 @@ public: // public interface
 // End-Of-File
 // ---------------------------------------------------------------------------
 
-#endif /* __EMU_Machine_h__ */
+#endif /* __EMU_VirtualMachine_h__ */

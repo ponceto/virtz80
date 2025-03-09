@@ -1,5 +1,5 @@
 /*
- * application.h - Copyright (c) 2001-2025 - Olivier Poncet
+ * globals.h - Copyright (c) 2001-2025 - Olivier Poncet
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,43 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __BASE_Application_h__
-#define __BASE_Application_h__
+#ifndef __APP_Globals_h__
+#define __APP_Globals_h__
 
 // ---------------------------------------------------------------------------
-// base::Application
+// app::Globals
 // ---------------------------------------------------------------------------
 
-namespace base {
+namespace app {
 
-class Application
+struct Globals
 {
-public: // public interface
-    Application(const std::string& name);
-
-    Application(const Application&) = delete;
-
-    Application& operator=(const Application&) = delete;
-
-    virtual ~Application() = default;
-
-    virtual auto loop() -> void = 0;
-
-    virtual auto quit() -> void = 0;
-
-    auto running() const -> bool
-    {
-        return _quit == false;
-    }
-
-    auto stopped() const -> bool
-    {
-        return _quit != false;
-    }
-
-protected: // protected data
-    const std::string _name;
-    bool              _quit;
+    static bool        verbose;
+    static bool        turbo;
+    static std::string bank0;
+    static std::string bank1;
+    static std::string bank2;
+    static std::string bank3;
 };
 
 }
@@ -59,4 +39,4 @@ protected: // protected data
 // End-Of-File
 // ---------------------------------------------------------------------------
 
-#endif /* __BASE_Application_h__ */
+#endif /* __APP_Globals_h__ */

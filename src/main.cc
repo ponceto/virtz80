@@ -1,5 +1,5 @@
 /*
- * emulator.h - Copyright (c) 2001-2025 - Olivier Poncet
+ * main.cc - Copyright (c) 2001-2025 - Olivier Poncet
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,65 +14,73 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __CORE_Emulator_h__
-#define __CORE_Emulator_h__
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cstdint>
+#include <cstdarg>
+#include <memory>
+#include <string>
+#include <vector>
+#include <iostream>
+#include <stdexcept>
+#include <unistd.h>
+#include <termios.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+#include "app/console.h"
+#include "app/program.h"
+#include "app/terminal.h"
 
-#include "base/console.h"
-#include "base/application.h"
-#include "emu/machine.h"
+using namespace app;
 
 // ---------------------------------------------------------------------------
-// aliases
+// <anonymous>::run
 // ---------------------------------------------------------------------------
 
-namespace core {
+namespace {
 
-using VirtualMachine      = emu::MachineInstance;
-using VirtualMachineIface = emu::MachineInterface;
+auto run(const ArgList& args) -> void
+{
+    const Terminal terminal(0, 1, 2);
+
+    if(Program::init(args) != false) {
+        Program::main(args);
+    }
+    else {
+        Program::help(args);
+    }
+}
 
 }
 
 // ---------------------------------------------------------------------------
-// core::Emulator
+// main
 // ---------------------------------------------------------------------------
 
-namespace core {
-
-class Emulator final
-    : public base::Application
-    , private VirtualMachineIface
+int main(int argc, char* argv[])
 {
-public: // public interface
-    Emulator();
+    const ArgList args(argv, argv + argc);
 
-    Emulator(const Emulator&) = delete;
-
-    Emulator& operator=(const Emulator&) = delete;
-
-    virtual ~Emulator() = default;
-
-    virtual auto loop() -> void override final;
-
-    virtual auto quit() -> void override final;
-
-private: // private data
-    using ClockType     = std::chrono::steady_clock;
-    using DurationType  = ClockType::duration;
-    using TimePointType = ClockType::time_point;
-
-private: // private data
-    VirtualMachine _vm;
-    DurationType   _duration;
-    TimePointType  _prev_time;
-    TimePointType  _curr_time;
-    TimePointType  _next_time;
-    bool           _turbo;
-};
-
+    try {
+        run(args);
+    }
+    catch(const std::exception& e) {
+        Console::error(e.what());
+        return EXIT_FAILURE;
+    }
+    catch(...) {
+        Console::error("error!");
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }
 
 // ---------------------------------------------------------------------------
 // End-Of-File
 // ---------------------------------------------------------------------------
-
-#endif /* __CORE_Emulator_h__ */

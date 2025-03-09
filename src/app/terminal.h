@@ -1,5 +1,5 @@
 /*
- * program.h - Copyright (c) 2001-2025 - Olivier Poncet
+ * terminal.h - Copyright (c) 2001-2025 - Olivier Poncet
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,46 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __CORE_Program_h__
-#define __CORE_Program_h__
+#ifndef __APP_Terminal_h__
+#define __APP_Terminal_h__
 
 // ---------------------------------------------------------------------------
-// core::ArgList
+// aliases
 // ---------------------------------------------------------------------------
 
-namespace core {
+namespace app {
 
-using ArgList = std::vector<std::string>;
+using termios_type = struct termios;
 
 }
 
 // ---------------------------------------------------------------------------
-// core::Program
+// app::Terminal
 // ---------------------------------------------------------------------------
 
-namespace core {
-
-struct Program
-{
-    static auto init(const ArgList& args) -> bool;
-
-    static auto main(const ArgList& args) -> void;
-
-    static auto help(const ArgList& args) -> void;
-};
-
-}
-
-// ---------------------------------------------------------------------------
-// core::Terminal
-// ---------------------------------------------------------------------------
-
-namespace core {
+namespace app {
 
 class Terminal
 {
 public: // public interface
-    Terminal();
+    Terminal(int fd0, int fd1, int fd2);
 
     Terminal(const Terminal&) = delete;
 
@@ -62,13 +45,12 @@ public: // public interface
     virtual ~Terminal();
 
 private: // private interface
-    using termios_type = struct termios;
-
     static auto get_attributes(int fd, termios_type& attributes) -> void;
 
     static auto set_attributes(int fd, termios_type& attributes) -> void;
 
 private: // private data
+    const int    _filedes[3];
     termios_type _termios[3];
 };
 
@@ -78,4 +60,4 @@ private: // private data
 // End-Of-File
 // ---------------------------------------------------------------------------
 
-#endif /* __CORE_Program_h__ */
+#endif /* __APP_Terminal_h__ */

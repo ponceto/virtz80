@@ -1,5 +1,5 @@
 /*
- * machine.cc - Copyright (c) 2001-2025 - Olivier Poncet
+ * virtual-machine.cc - Copyright (c) 2001-2025 - Olivier Poncet
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,18 +28,16 @@
 #include <vector>
 #include <iostream>
 #include <stdexcept>
-#include "globals.h"
-#include "machine.h"
+#include "virtual-machine.h"
 
 // ---------------------------------------------------------------------------
-// emu::MachineInstance
+// emu::VirtualMachine
 // ---------------------------------------------------------------------------
 
 namespace emu {
 
-MachineInstance::MachineInstance(MachineInterface& interface)
-    : _interface(interface)
-    , _setup()
+VirtualMachine::VirtualMachine(VirtualMachineIface& iface)
+    : _iface(iface)
     , _state()
     , _cpu(*this)
     , _mmu(*this)
@@ -49,13 +47,13 @@ MachineInstance::MachineInstance(MachineInterface& interface)
 {
 }
 
-MachineInstance::~MachineInstance()
+VirtualMachine::~VirtualMachine()
 {
     _sio0.print('\n');
     _sio1.print('\n');
 }
 
-auto MachineInstance::reset() -> void
+auto VirtualMachine::reset() -> void
 {
     auto reset_state = [&]() -> void
     {
@@ -90,10 +88,10 @@ auto MachineInstance::reset() -> void
     auto reset_mmu = [&]() -> void
     {
         _mmu.reset();
-        _mmu.load_bank(_setup.bank0, 0);
-        _mmu.load_bank(_setup.bank1, 1);
-        _mmu.load_bank(_setup.bank2, 2);
-        _mmu.load_bank(_setup.bank3, 3);
+        _mmu.load_bank(_iface.get("bank0"), 0);
+        _mmu.load_bank(_iface.get("bank1"), 1);
+        _mmu.load_bank(_iface.get("bank2"), 2);
+        _mmu.load_bank(_iface.get("bank3"), 3);
     };
 
     auto reset_vdu = [&]() -> void
@@ -119,7 +117,7 @@ auto MachineInstance::reset() -> void
     return reset_all();
 }
 
-auto MachineInstance::clock() -> void
+auto VirtualMachine::clock() -> void
 {
     if((_state.ready = _state.stopped) == false) {
         const uint32_t cpu_clock = _state.cpu_clock;
@@ -145,40 +143,40 @@ auto MachineInstance::clock() -> void
                 reset();
             }
 #endif
-        } while((_state.ready |= _state.stopped) == false);
+        } while((_state.ready | _state.stopped) == false);
     }
 }
 
-auto MachineInstance::stop() -> void
+auto VirtualMachine::stop() -> void
 {
     if(_state.stopped == false) {
         _state.stopped = true;
         _state.ready   = true;
-        _interface.quit();
+        _iface.quit();
     }
 }
 
-auto MachineInstance::cpu_mreq_m1(cpu::Instance& cpu, uint16_t addr, uint8_t data) -> uint8_t
+auto VirtualMachine::cpu_mreq_m1(cpu::Instance& cpu, uint16_t addr, uint8_t data) -> uint8_t
 {
     return _mmu.rd_byte(addr, data);
 }
 
-auto MachineInstance::cpu_mreq_rd(cpu::Instance& cpu, uint16_t addr, uint8_t data) -> uint8_t
+auto VirtualMachine::cpu_mreq_rd(cpu::Instance& cpu, uint16_t addr, uint8_t data) -> uint8_t
 {
     return _mmu.rd_byte(addr, data);
 }
 
-auto MachineInstance::cpu_mreq_wr(cpu::Instance& cpu, uint16_t addr, uint8_t data) -> uint8_t
+auto VirtualMachine::cpu_mreq_wr(cpu::Instance& cpu, uint16_t addr, uint8_t data) -> uint8_t
 {
     return _mmu.wr_byte(addr, data);
 }
 
-auto MachineInstance::cpu_iorq_m1(cpu::Instance& cpu, uint16_t port, uint8_t data) -> uint8_t
+auto VirtualMachine::cpu_iorq_m1(cpu::Instance& cpu, uint16_t port, uint8_t data) -> uint8_t
 {
     return 0x00;
 }
 
-auto MachineInstance::cpu_iorq_rd(cpu::Instance& cpu, uint16_t port, uint8_t data) -> uint8_t
+auto VirtualMachine::cpu_iorq_rd(cpu::Instance& cpu, uint16_t port, uint8_t data) -> uint8_t
 {
     auto rd_sio0 = [&]() -> void
     {
@@ -219,7 +217,7 @@ auto MachineInstance::cpu_iorq_rd(cpu::Instance& cpu, uint16_t port, uint8_t dat
     return iorq_rd();
 }
 
-auto MachineInstance::cpu_iorq_wr(cpu::Instance& cpu, uint16_t port, uint8_t data) -> uint8_t
+auto VirtualMachine::cpu_iorq_wr(cpu::Instance& cpu, uint16_t port, uint8_t data) -> uint8_t
 {
     auto wr_sio0 = [&]() -> void
     {
@@ -262,22 +260,22 @@ auto MachineInstance::cpu_iorq_wr(cpu::Instance& cpu, uint16_t port, uint8_t dat
     return iorq_wr();
 }
 
-auto MachineInstance::mmu_char_wr(mmu::Instance& mmu, uint8_t data) -> uint8_t
+auto VirtualMachine::mmu_char_wr(mmu::Instance& mmu, uint8_t data) -> void
 {
-    return _sio0.print(data);
+    _sio0.print(data);
 }
 
-auto MachineInstance::vdu_sync_hs(vdu::Instance& vdu, bool data) -> void
+auto VirtualMachine::vdu_sync_hs(vdu::Instance& vdu, bool data) -> void
 {
     _state.ready |= false;
 }
 
-auto MachineInstance::vdu_sync_vs(vdu::Instance& vdu, bool data) -> void
+auto VirtualMachine::vdu_sync_vs(vdu::Instance& vdu, bool data) -> void
 {
     _state.ready |= true;
 }
 
-auto MachineInstance::sio_intr_rq(sio::Instance& sio) -> void
+auto VirtualMachine::sio_intr_rq(sio::Instance& sio) -> void
 {
     _cpu.pulse_int();
 }

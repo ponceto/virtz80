@@ -69,42 +69,48 @@ serve: serve_virtz80
 virtz80_PROGRAM = virtz80.html
 
 virtz80_SOURCES = \
-	src/base/application.cc \
-	src/base/console.cc \
-	src/globals.cc \
-	src/program.cc \
-	src/emulator.cc \
-	src/emu/machine.cc \
-	src/emu/cpu/cpu-core.cc \
-	src/emu/mmu/mmu-core.cc \
-	src/emu/vdu/vdu-core.cc \
-	src/emu/sio/sio-core.cc \
+	src/main.cc \
+	src/app/application.cc \
+	src/app/console.cc \
+	src/app/globals.cc \
+	src/app/program.cc \
+	src/app/terminal.cc \
+	src/app/emulator.cc \
+	src/dev/cpu/cpu-core.cc \
+	src/dev/mmu/mmu-core.cc \
+	src/dev/vdu/vdu-core.cc \
+	src/dev/sio/sio-core.cc \
+	src/emu/virtual-machine.cc \
 	$(NULL)
 
 virtz80_HEADERS = \
-	src/base/application.h \
-	src/base/console.h \
-	src/globals.h \
-	src/program.h \
-	src/emulator.h \
-	src/emu/machine.h \
-	src/emu/cpu/cpu-core.h \
-	src/emu/mmu/mmu-core.h \
-	src/emu/vdu/vdu-core.h \
-	src/emu/sio/sio-core.h \
+	src/main.h \
+	src/app/application.h \
+	src/app/console.h \
+	src/app/globals.h \
+	src/app/program.h \
+	src/app/terminal.h \
+	src/app/emulator.h \
+	src/dev/cpu/cpu-core.h \
+	src/dev/mmu/mmu-core.h \
+	src/dev/vdu/vdu-core.h \
+	src/dev/sio/sio-core.h \
+	src/emu/virtual-machine.h \
 	$(NULL)
 
 virtz80_OBJECTS = \
-	src/base/application.o \
-	src/base/console.o \
-	src/globals.o \
-	src/program.o \
-	src/emulator.o \
-	src/emu/machine.o \
-	src/emu/cpu/cpu-core.o \
-	src/emu/mmu/mmu-core.o \
-	src/emu/vdu/vdu-core.o \
-	src/emu/sio/sio-core.o \
+	src/main.o \
+	src/app/application.o \
+	src/app/console.o \
+	src/app/globals.o \
+	src/app/program.o \
+	src/app/terminal.o \
+	src/app/emulator.o \
+	src/dev/cpu/cpu-core.o \
+	src/dev/mmu/mmu-core.o \
+	src/dev/vdu/vdu-core.o \
+	src/dev/sio/sio-core.o \
+	src/emu/virtual-machine.o \
 	$(NULL)
 
 virtz80_LDFLAGS = \

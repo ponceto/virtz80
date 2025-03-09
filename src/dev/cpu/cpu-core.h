@@ -14,8 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __EMU_CPU_CORE_H__
-#define __EMU_CPU_CORE_H__
+#ifndef __DEV_CPU_CORE_H__
+#define __DEV_CPU_CORE_H__
 
 // ---------------------------------------------------------------------------
 // forward declarations
@@ -170,4 +170,4 @@ public: // public interface
 // End-Of-File
 // ---------------------------------------------------------------------------
 
-#endif /* __EMU_CPU_CORE_H__ */
+#endif /* __DEV_CPU_CORE_H__ */

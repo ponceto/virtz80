@@ -1,5 +1,5 @@
 /*
- * console.h - Copyright (c) 2001-2025 - Olivier Poncet
+ * main.h - Copyright (c) 2001-2025 - Olivier Poncet
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,34 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __BASE_Console_h__
-#define __BASE_Console_h__
+#ifndef __MAIN_H__
+#define __MAIN_H__
 
 // ---------------------------------------------------------------------------
-// base::Console
+// main
 // ---------------------------------------------------------------------------
 
-namespace base {
-
-struct Console
-{
-    static auto trace(const char* format, ...) -> void;
-
-    static auto debug(const char* format, ...) -> void;
-
-    static auto print(const char* format, ...) -> void;
-
-    static auto alert(const char* format, ...) -> void;
-
-    static auto error(const char* format, ...) -> void;
-
-    static auto fatal(const char* format, ...) -> void;
-};
-
-}
+extern int main(int argc, char* argv[]);
 
 // ---------------------------------------------------------------------------
 // End-Of-File
 // ---------------------------------------------------------------------------
 
-#endif /* __BASE_Console_h__ */
+#endif /* __MAIN_H__ */

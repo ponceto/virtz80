@@ -1,5 +1,5 @@
 /*
- * application.cc - Copyright (c) 2001-2025 - Olivier Poncet
+ * program.h - Copyright (c) 2001-2025 - Olivier Poncet
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,41 +14,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cstdint>
-#include <cstdarg>
-#include <chrono>
-#include <thread>
-#include <memory>
-#include <string>
-#include <vector>
-#include <iostream>
-#include <stdexcept>
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#endif
-#include "application.h"
+#ifndef __APP_Program_h__
+#define __APP_Program_h__
 
 // ---------------------------------------------------------------------------
-// base::Application
+// app::ArgList
 // ---------------------------------------------------------------------------
 
-namespace base {
+namespace app {
 
-Application::Application(const std::string& name)
-    : _name(name)
-    , _quit(false)
-{
+using ArgList = std::vector<std::string>;
+
 }
+
+// ---------------------------------------------------------------------------
+// app::Program
+// ---------------------------------------------------------------------------
+
+namespace app {
+
+struct Program
+{
+    static auto init(const ArgList& args) -> bool;
+
+    static auto main(const ArgList& args) -> void;
+
+    static auto help(const ArgList& args) -> void;
+};
 
 }
 
 // ---------------------------------------------------------------------------
 // End-Of-File
 // ---------------------------------------------------------------------------
+
+#endif /* __APP_Program_h__ */

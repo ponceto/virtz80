@@ -1,5 +1,5 @@
 /*
- * emulator.cc - Copyright (c) 2001-2025 - Olivier Poncet
+ * terminal.cc - Copyright (c) 2001-2025 - Olivier Poncet
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,51 +30,52 @@
 #include <vector>
 #include <iostream>
 #include <stdexcept>
+#include <unistd.h>
+#include <termios.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
-#include "globals.h"
-#include "emulator.h"
+#include "terminal.h"
 
 // ---------------------------------------------------------------------------
-// core::Emulator
+// Terminal
 // ---------------------------------------------------------------------------
 
-namespace core {
+namespace app {
 
-Emulator::Emulator()
-    : base::Application("virtz80")
-    , _vm(*this)
-    , _duration(std::chrono::microseconds(16667))
-    , _prev_time(ClockType::now())
-    , _curr_time(ClockType::now())
-    , _next_time(ClockType::now())
-    , _turbo(Globals::turbo)
+Terminal::Terminal(int fd0, int fd1, int fd2)
+    : _filedes{fd0, fd1, fd2}
+    , _termios()
 {
-    _vm.reset();
+    get_attributes(_filedes[0], _termios[0]);
+    get_attributes(_filedes[1], _termios[1]);
+    get_attributes(_filedes[2], _termios[2]);
 }
 
-auto Emulator::loop() -> void
+Terminal::~Terminal()
 {
-    _prev_time = _curr_time;
-    _curr_time = ClockType::now();
-    _next_time = _next_time + _duration;
-
-    if(_turbo != false) {
-        _next_time = _curr_time;
-    }
-    else if(_curr_time < _next_time) {
-        std::this_thread::sleep_until(_next_time);
-    }
-
-    return _vm.clock();
+    set_attributes(_filedes[0], _termios[0]);
+    set_attributes(_filedes[1], _termios[1]);
+    set_attributes(_filedes[2], _termios[2]);
 }
 
-auto Emulator::quit() -> void
+auto Terminal::get_attributes(int fd, termios_type& attributes) -> void
 {
-    if(_quit == false) {
-        _quit = true;
-        _vm.stop();
+    if((fd >= 0) && (::isatty(fd) != 0)) {
+        const int rc = ::tcgetattr(fd, &attributes);
+        if(rc != 0) {
+            throw std::runtime_error("tcgetattr() has failed");
+        }
+    }
+}
+
+auto Terminal::set_attributes(int fd, termios_type& attributes) -> void
+{
+    if((fd >= 0) && (::isatty(fd) != 0)) {
+        const int rc = ::tcsetattr(fd, TCSANOW, &attributes);
+        if(rc != 0) {
+            throw std::runtime_error("tcsetattr() has failed");
+        }
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * globals.cc - Copyright (c) 2001-2025 - Olivier Poncet
+ * emulator.cc - Copyright (c) 2001-2025 - Olivier Poncet
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,42 +34,65 @@
 #include <emscripten.h>
 #endif
 #include "globals.h"
+#include "emulator.h"
 
 // ---------------------------------------------------------------------------
-// core::Globals
+// app::Emulator
 // ---------------------------------------------------------------------------
 
-namespace core {
+namespace app {
 
-bool        Globals::verbose = false;
-bool        Globals::turbo   = false;
-std::string Globals::bank0;
-std::string Globals::bank1;
-std::string Globals::bank2;
-std::string Globals::bank3;
-
+Emulator::Emulator()
+    : Application("virtz80")
+    , _vm(*this)
+    , _duration(std::chrono::microseconds(16667))
+    , _prev_time(ClockType::now())
+    , _curr_time(ClockType::now())
+    , _next_time(ClockType::now())
+    , _turbo(Globals::turbo)
+{
+    _vm.reset();
 }
 
-// ---------------------------------------------------------------------------
-// core::Globals
-// ---------------------------------------------------------------------------
-
-namespace core {
-
-auto Globals::init() -> void
+auto Emulator::loop() -> void
 {
-    if(bank0.empty()) {
-        Globals::bank0 = "assets/zexall.rom";
+    _prev_time = _curr_time;
+    _curr_time = ClockType::now();
+    _next_time = _next_time + _duration;
+
+    if(_turbo != false) {
+        _next_time = _curr_time;
     }
-    if(bank1.empty()) {
-        Globals::bank1 = "assets/bank1.rom";
+    else if(_curr_time < _next_time) {
+        std::this_thread::sleep_until(_next_time);
     }
-    if(bank2.empty()) {
-        Globals::bank2 = "assets/bank2.rom";
+
+    return _vm.clock();
+}
+
+auto Emulator::quit() -> void
+{
+    if(_quit == false) {
+        _quit = true;
+        _vm.stop();
     }
-    if(bank3.empty()) {
-        Globals::bank3 = "assets/bank3.rom";
+}
+
+auto Emulator::get(const std::string& name) -> std::string
+{
+    if(name == "bank0") {
+        return app::Globals::bank0;
     }
+    if(name == "bank1") {
+        return app::Globals::bank1;
+    }
+    if(name == "bank2") {
+        return app::Globals::bank2;
+    }
+    if(name == "bank3") {
+        return app::Globals::bank3;
+    }
+    throw std::runtime_error("unknown setting");
 }
 
 }

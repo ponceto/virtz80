@@ -31,6 +31,14 @@
 #include "mmu-core.h"
 
 // ---------------------------------------------------------------------------
+// some useful macros
+// ---------------------------------------------------------------------------
+
+#ifndef countof
+#define countof(array) (sizeof(array) / sizeof(array[0]))
+#endif
+
+// ---------------------------------------------------------------------------
 // <anonymous>::mmu_io
 // ---------------------------------------------------------------------------
 
@@ -39,6 +47,90 @@ namespace {
 constexpr uint16_t MMU_OACK_ADDR = 0xfffd; /* output ack       */
 constexpr uint16_t MMU_OREQ_ADDR = 0xfffe; /* output request   */
 constexpr uint16_t MMU_OCHR_ADDR = 0xffff; /* output character */
+
+}
+
+// ---------------------------------------------------------------------------
+// mmu::BankReader
+// ---------------------------------------------------------------------------
+
+namespace mmu {
+
+class BankReader
+{
+public: // public interface
+    BankReader(const std::string& filename)
+        : _filename(filename)
+        , _stream(::fopen(_filename.c_str(), "rb"))
+    {
+        if(_stream == nullptr) {
+            throw std::runtime_error("fopen() has failed");
+        }
+    }
+
+    virtual ~BankReader()
+    {
+        if(_stream != nullptr) {
+            _stream = (::fclose(_stream), nullptr);
+        }
+    }
+
+    auto load(Bank& bank) -> void
+    {
+        uint8_t*   buffer = bank.data;
+        size_t     length = countof(bank.data);
+        const auto result = ::fread(buffer, sizeof(*buffer), length, _stream);
+        if(result != length) {
+            throw std::runtime_error("fread() has failed");
+        }
+    }
+
+private: // private data
+    const std::string _filename;
+    FILE*             _stream;
+};
+
+}
+
+// ---------------------------------------------------------------------------
+// mmu::BankWriter
+// ---------------------------------------------------------------------------
+
+namespace mmu {
+
+class BankWriter
+{
+public: // public interface
+    BankWriter(const std::string& filename)
+        : _filename(filename)
+        , _stream(::fopen(_filename.c_str(), "wb"))
+    {
+        if(_stream == nullptr) {
+            throw std::runtime_error("fopen() has failed");
+        }
+    }
+
+    virtual ~BankWriter()
+    {
+        if(_stream != nullptr) {
+            _stream = (::fclose(_stream), nullptr);
+        }
+    }
+
+    auto save(Bank& bank) -> void
+    {
+        uint8_t*   buffer = bank.data;
+        size_t     length = countof(bank.data);
+        const auto result = ::fwrite(buffer, sizeof(*buffer), length, _stream);
+        if(result != length) {
+            throw std::runtime_error("fwrite() has failed");
+        }
+    }
+
+private: // private data
+    const std::string _filename;
+    FILE*             _stream;
+};
 
 }
 
@@ -96,7 +188,7 @@ auto Instance::wr_byte(uint16_t addr, uint8_t data) -> uint8_t
         uint8_t& oreq = bank.data[MMU_OREQ_ADDR & 0x3fff];
         uint8_t& ochr = bank.data[MMU_OCHR_ADDR & 0x3fff];
         if(data != oreq) {
-            static_cast<void>(_interface.mmu_char_wr(*this, ochr));
+            _interface.mmu_char_wr(*this, ochr);
             ++oack;
         }
     }
@@ -106,20 +198,8 @@ auto Instance::wr_byte(uint16_t addr, uint8_t data) -> uint8_t
 auto Instance::load_bank(const std::string& filename, const int index) -> void
 {
     if((index >= 0) && (index <= 3)) {
-        FILE* file = ::fopen(filename.c_str(), "rb");
-        if(file != nullptr) {
-            auto&            memory = _state.bank[index];
-            uint8_t*         buffer = memory.data;
-            constexpr size_t length = sizeof(memory.data);
-            const     size_t result = ::fread(buffer, sizeof(*buffer), length, file);
-            file = (::fclose(file), nullptr);
-            if(result != length) {
-                throw std::runtime_error("load_bank() has failed (load error)");
-            }
-        }
-        else {
-            throw std::runtime_error("load_bank() has failed (cannot open file)");
-        }
+        BankReader reader(filename);
+        reader.load(_state.bank[index]);
     }
     else {
         throw std::runtime_error("load_bank() has failed (invalid index)");
@@ -129,20 +209,8 @@ auto Instance::load_bank(const std::string& filename, const int index) -> void
 auto Instance::save_bank(const std::string& filename, const int index) -> void
 {
     if((index >= 0) && (index <= 3)) {
-        FILE* file = ::fopen(filename.c_str(), "wb");
-        if(file != nullptr) {
-            auto&            memory = _state.bank[index];
-            uint8_t*         buffer = memory.data;
-            constexpr size_t length = sizeof(memory.data);
-            const     size_t result = ::fwrite(buffer, sizeof(*buffer), length, file);
-            file = (::fclose(file), nullptr);
-            if(result != length) {
-                throw std::runtime_error("save_bank() has failed (save error)");
-            }
-        }
-        else {
-            throw std::runtime_error("save_bank() has failed (cannot open file)");
-        }
+        BankWriter writer(filename);
+        writer.save(_state.bank[index]);
     }
     else {
         throw std::runtime_error("save_bank() has failed (invalid index)");

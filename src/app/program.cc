@@ -31,8 +31,6 @@
 #include <vector>
 #include <iostream>
 #include <stdexcept>
-#include <unistd.h>
-#include <termios.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
@@ -46,7 +44,7 @@
 
 namespace {
 
-auto program_name(const core::ArgList& args) -> const char*
+auto program_name(const app::ArgList& args) -> const char*
 {
     const char* arg = args[0].c_str();
     const char* sep = ::strrchr(arg, '/');
@@ -93,10 +91,10 @@ auto yes_or_no(const bool boolean) -> std::string
 }
 
 // ---------------------------------------------------------------------------
-// core::Program
+// app::Program
 // ---------------------------------------------------------------------------
 
-namespace core {
+namespace app {
 
 auto Program::init(const ArgList& args) -> bool
 {
@@ -153,14 +151,7 @@ auto Program::init(const ArgList& args) -> bool
         return true;
     };
 
-    auto do_init = [&]() -> bool
-    {
-        Globals::init();
-
-        return do_parse();
-    };
-
-    return do_init();
+    return do_parse();
 }
 
 auto Program::main(const ArgList& args) -> void
@@ -238,80 +229,6 @@ auto Program::help(const ArgList& args) -> void
     return do_help(std::cout);
 }
 
-}
-
-// ---------------------------------------------------------------------------
-// Terminal
-// ---------------------------------------------------------------------------
-
-namespace core {
-
-Terminal::Terminal()
-    : _termios()
-{
-    get_attributes(0, _termios[0]);
-    get_attributes(1, _termios[1]);
-    get_attributes(2, _termios[2]);
-}
-
-Terminal::~Terminal()
-{
-    set_attributes(0, _termios[0]);
-    set_attributes(1, _termios[1]);
-    set_attributes(2, _termios[2]);
-}
-
-auto Terminal::get_attributes(int fd, termios_type& attributes) -> void
-{
-    if(::isatty(fd) != 0) {
-        const int rc = ::tcgetattr(fd, &attributes);
-        if(rc != 0) {
-            throw std::runtime_error("tcgetattr() has failed");
-        }
-    }
-}
-
-auto Terminal::set_attributes(int fd, termios_type& attributes) -> void
-{
-    if(::isatty(fd) != 0) {
-        const int rc = ::tcsetattr(fd, TCSANOW, &attributes);
-        if(rc != 0) {
-            throw std::runtime_error("tcsetattr() has failed");
-        }
-    }
-}
-
-}
-
-// ---------------------------------------------------------------------------
-// main
-// ---------------------------------------------------------------------------
-
-using namespace base;
-using namespace core;
-
-int main(int argc, char* argv[])
-{
-    const ArgList args(argv, argv + argc);
-
-    try {
-        const Terminal terminal;
-        if(Program::init(args) != false) {
-            Program::main(args);
-        }
-        else {
-            Program::help(args);
-        }
-    }
-    catch(const std::exception& e) {
-        Console::error(e.what());
-        return EXIT_FAILURE;
-    }
-    catch(...) {
-        Console::error("error!");
-        return EXIT_FAILURE;
-    }
-    return EXIT_SUCCESS;
 }
 
 // ---------------------------------------------------------------------------
