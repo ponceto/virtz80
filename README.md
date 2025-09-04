@@ -295,7 +295,7 @@ DEVICES, DIR, HELP, RESET
 To run the WASM version, you can use the Python built-in http server:
 
 ```
-python3 -m http.server
+emrun virtz80.html
 ```
 
 or use the `Makefile.wasm`:
@@ -307,11 +307,11 @@ make -f Makefile.wasm serve
 Expected results:
 
 ```
-python3 -m http.server
-Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
+emrun virtz80.html
+Now listening at http://0.0.0.0:6931/
 ```
 
-Then open your browser and point to [localhost/virtz80.html](http://127.0.0.1:8000/virtz80.html)
+Then open your browser and point to [localhost:6931/virtz80.html](http://localhost:6931/virtz80.html)
 
 ## LICENSING
 

@@ -22,7 +22,7 @@
 TOPDIR   = $(CURDIR)
 OPTLEVEL = -O2 -g
 WARNINGS = -Wall
-EXTRAS   = -pthread
+EXTRAS   = -pthread -fstack-protector-strong
 CC       = gcc
 CFLAGS   = -std=c99 $(OPTLEVEL) $(WARNINGS) $(EXTRAS)
 CXX      = g++
@@ -30,7 +30,7 @@ CXXFLAGS = -std=c++14 $(OPTLEVEL) $(WARNINGS) $(EXTRAS)
 CPP      = cpp
 CPPFLAGS = -I. -I$(TOPDIR)/src -D_DEFAULT_SOURCE -D_FORTIFY_SOURCE=2 -DLSB_FIRST
 LD       = g++
-LDFLAGS  = -L.
+LDFLAGS  = -O2 -L.
 CP       = cp
 CPFLAGS  = -f
 RM       = rm

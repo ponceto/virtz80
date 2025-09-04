@@ -27,7 +27,7 @@ CC       = emcc
 CFLAGS   = -std=c99 $(OPTLEVEL) $(WARNINGS) $(EXTRAS)
 CXX      = em++
 CXXFLAGS = -std=c++14 $(OPTLEVEL) $(WARNINGS) $(EXTRAS)
-CPP      = cpp
+CPP      = emcpp
 CPPFLAGS = -I. -I$(TOPDIR)/src -D_DEFAULT_SOURCE -D_FORTIFY_SOURCE=2 -DLSB_FIRST
 LD       = em++
 LDFLAGS  = -L.
@@ -35,7 +35,6 @@ CP       = cp
 CPFLAGS  = -f
 RM       = rm
 RMFLAGS  = -f
-PYTHON   = python3
 
 # ----------------------------------------------------------------------------
 # default rules
@@ -159,7 +158,7 @@ clean_virtz80:
 # ----------------------------------------------------------------------------
 
 serve_virtz80:
-	$(PYTHON) -m http.server
+	emrun $(virtz80_PROGRAM)
 
 # ----------------------------------------------------------------------------
 # End-Of-File
