@@ -320,7 +320,7 @@ Then open your browser and point to [localhost:6931/virtz80.html](http://localho
 This project is released under the `GPLv2` license.
 
 ```
-Z80 emulator - Copyright (c) 2001-2025 - Olivier Poncet
+Z80 emulator - Copyright (c) 2001-2026 - Olivier Poncet
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
