@@ -16,39 +16,50 @@
 #
 
 # ----------------------------------------------------------------------------
+# default
+# ----------------------------------------------------------------------------
+
+default:
+  image: debian:stable
+
+# ----------------------------------------------------------------------------
 # stages
 # ----------------------------------------------------------------------------
 
 stages:
-  - build-bin
+  - build
 
 # ----------------------------------------------------------------------------
-# build-bin_amd64
+# build_amd64
 # ----------------------------------------------------------------------------
 
-build-bin_amd64:
-  stage: build-bin
-  when: on_success
+build_amd64:
+  stage: build
   tags:
-    - debian-12-amd64
+    - docker
+    - amd64
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
     - if: $CI_COMMIT_BRANCH == "release"
+  before_script:
+    - ./.ci/ci-setup-debian.sh
   script:
     - make clean && make -j$(nproc)
 
 # ----------------------------------------------------------------------------
-# build-bin_arm64
+# build_arm64
 # ----------------------------------------------------------------------------
 
-build-bin_arm64:
-  stage: build-bin
-  when: on_success
+build_arm64:
+  stage: build
   tags:
-    - debian-12-arm64
+    - docker
+    - arm64
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
     - if: $CI_COMMIT_BRANCH == "release"
+  before_script:
+    - ./.ci/ci-setup-debian.sh
   script:
     - make clean && make -j$(nproc)
 
